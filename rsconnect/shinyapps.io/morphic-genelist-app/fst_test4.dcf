@@ -1,0 +1,10 @@
+name: fst_test4
+title:
+username: morphic-genelist-app
+account: morphic-genelist-app
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11369413
+bundleId: 8313496
+url: https://whri-phenogenomics.shinyapps.io/fst_test4/
+version: 1

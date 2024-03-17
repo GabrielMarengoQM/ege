@@ -1,0 +1,28 @@
+column(
+  width = 4,
+  card(
+    height = 600,
+    full_screen = TRUE,
+    card_header("Gene constraint Filters"),
+    card_body(
+      awesomeCheckbox(
+        ns("constraint_annotations_checkbox"),
+        label = "Filter for all genes with associated gene constraint metrics", 
+        value = FALSE
+      ),
+      sliderInput(ns('mean_score_all_filter'),
+                  label = 'Gene effect score - mean across all DepMap cancer lines',
+                  value = c(min(constraint_data$mean_score_all, na.rm = TRUE), max(constraint_data$mean_score_all, na.rm = TRUE)),
+                  min = min(constraint_data$mean_score_all, na.rm = TRUE),
+                  max(constraint_data$mean_score_all, na.rm = TRUE),
+                  round = 2,
+                  width = "100%"
+      ),
+      materialSwitch(
+        ns("mean_score_all_na_switch"),
+        "mean_score_all_na_switch",
+        value = TRUE
+      )
+    )
+  )
+)
