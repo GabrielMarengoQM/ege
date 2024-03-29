@@ -2,22 +2,20 @@ box::use(
   shiny[bootstrapPage, div, moduleServer, NS, renderUI, tags, uiOutput, renderText, textOutput, tagList,
         fluidRow, column, actionButton, observe, observeEvent, numericInput, sliderInput, textAreaInput,
         fileInput, hr, downloadHandler, downloadButton, textInput, req, reactive, tabsetPanel, tabPanel,
-        icon, h5, p],
+        icon, h5],
   fst[read.fst],
   reactable[reactable, reactableOutput, renderReactable],
   shinyWidgets[pickerInput, progressBar, updateProgressBar, pickerOptions, materialSwitch, awesomeCheckbox,
-               multiInput, updateMultiInput, dropdownButton, tooltipOptions, useShinydashboard],
+               multiInput, updateMultiInput, dropdownButton, tooltipOptions],
   dplyr[...],
-  stats[na.omit, setNames],
-  bslib[page_navbar, nav_panel, card, card_header, card_body, tooltip],
-  bsicons[bs_icon],
+  stats[na.omit],
+  bslib[page_navbar, nav_panel, card, card_header, card_body],
   shinydashboard[box],
-  htmltools[br, includeScript, HTML],
+  htmltools[br],
   stringr[str_detect],
   tidyr[separate_rows],
   utils[read.delim, write.csv],
-  shinyjs[reset, useShinyjs, disable, show, hide],
-  shinydashboard[...]
+  shinyjs[reset, useShinyjs, disable]
 )
 
 #' @export
@@ -34,542 +32,405 @@ ui <- function(id, data_list) {
   
   tagList(
     useShinyjs(),
-    useShinydashboard(),
-    #includeScript(path = "app.js"),
+    
     # Filters UI ----
     fluidRow(
       column(
-        width = 3,
-        div(class = "filterHeader", # Add a row container
-            div(class = "col-auto h5-column", # Define a column for the h5 element
-                h5("Filters")
-            ),
-            div(class = "col-auto actionButton-column", # Define a column for the bs_icon
-                actionButton(ns("reset_filters"), "Reset")
-            )
-        ),
-        br(),
+        width = 4,
         # IMPC UI ----
-        box(title = tooltip(
-          trigger = list(
-            "Mouse models",
-            bs_icon("info-circle")
+        h5("Filters"),
+        hr(),
+        actionButton(ns("reset_filters"), "reset filters"),
+        hr(),
+        h5("IMPC filters"),
+        dropdownButton(
+          awesomeCheckbox(
+            ns("impc_annotations_checkbox"),
+            label = "Filter for all genes phenotyped by the IMPC", 
+            value = FALSE
           ),
-          HTML("Knockout mouse data from the International Mouse Phenotyping Consortium (IMPC) and the
-               Mouse Genome Informatics (MGI) databases")
+          hr(),
+          pickerInput(
+            ns("impc_viability_filter"),
+            "IMPC viability",
+            choices = sort(na.omit(unique(impc_data$impc_viability))),
+            selected = sort(na.omit(unique(impc_data$impc_viability))),
+            multiple = TRUE
           ),
-        collapsible = TRUE, collapsed = TRUE, width = "100%",
-        awesomeCheckbox(
-          ns("impc_annotations_checkbox"),
-          label = "Enable IMPC filters", 
-          value = FALSE
-        ),
-        # F1
-        fluidRow(
-          column(
-            width=8,
-            pickerInput(
-              ns("impc_viability_filter"),
-              label = "Viability after knockout",
-              choices = sort(na.omit(unique(impc_data$impc_viability))),
-              selected = sort(na.omit(unique(impc_data$impc_viability))),
-              multiple = TRUE
-            )
+          materialSwitch(
+            ns("impc_viability_na_switch"),
+            "impc_viability_na_switch",
+            value = TRUE
           ),
-          column(
-            width=4,
-            materialSwitch(
-              ns("impc_viability_na_switch"),
-              "NA switch",
-              value = FALSE
-            ) |>
-              tooltip("Switch On/Off to include/exclude missing values")
-          )
-        ),
-        # F2
-        fluidRow(
-          column(
-            width=8,
-            pickerInput(
-              ns("impc_zygosity_filter"),
-              "Zygosity",
-              choices = sort(na.omit(unique(impc_data$impc_zygosity))),
-              selected = sort(na.omit(unique(impc_data$impc_zygosity))),
-              multiple = TRUE
-            )
+          hr(),
+          pickerInput(
+            ns("impc_zygosity_filter"),
+            "IMPC zygosity",
+            choices = sort(na.omit(unique(impc_data$impc_zygosity))),
+            selected = sort(na.omit(unique(impc_data$impc_zygosity))),
+            multiple = TRUE
           ),
-          column(
-            width=4,
-            materialSwitch(
-              ns("impc_zygosity_na_switch"),
-              "NA switch",
-              value = FALSE
-            )
-          )
-        ),
-        # F3
-        fluidRow(
-          column(
-            width=8,
-            pickerInput(
-              ns("impc_wol_filter"),
-              "Window of Lethality",
-              choices = sort(na.omit(unique(impc_data$wol))),
-              selected = sort(na.omit(unique(impc_data$wol))),
-              multiple = TRUE
-            )
+          materialSwitch(
+            ns("impc_zygosity_na_switch"),
+            "impc_zygosity_na_switch",
+            value = TRUE
           ),
-          column(
-            width=4,
-            materialSwitch(
-              ns("impc_wol_na_switch"),
-              "NA switch",
-              value = FALSE
-            )
-          )
-        ),
-        # F4
-        fluidRow(
-          column(
-            width=8,
-            pickerInput(
-              ns("impc_ortholog_filter"),
-              "Ortholog mapping",
-              choices = sort(na.omit(unique(impc_data$ortholog_mapping))),
-              selected = sort(na.omit(unique(impc_data$ortholog_mapping))),
-              multiple = TRUE
-            )
+          hr(),
+          pickerInput(
+            ns("impc_wol_filter"),
+            "IMPC Window of Lethality",
+            choices = sort(na.omit(unique(impc_data$wol))),
+            selected = sort(na.omit(unique(impc_data$wol))),
+            multiple = TRUE
           ),
-          column(
-            width=4,
-            materialSwitch(
-              ns("impc_ortholog_na_switch"),
-              "NA switch",
-              value = FALSE
-            )
-          )
-        ),
-        # F5
-        fluidRow(
+          materialSwitch(
+            ns("impc_wol_na_switch"),
+            "impc_wol_na_switch",
+            value = TRUE
+          ),
+          hr(),
+          pickerInput(
+            ns("impc_ortholog_filter"),
+            "Orthologs",
+            choices = sort(na.omit(unique(impc_data$ortholog_mapping))),
+            selected = sort(na.omit(unique(impc_data$ortholog_mapping))),
+            multiple = TRUE
+          ),
+          materialSwitch(
+            ns("impc_ortholog_na_switch"),
+            "impc_ortholog_na_switch",
+            value = TRUE
+          ),
+          hr(),
           textAreaInput(
             ns("impc_phenotypes_filter"),
-            "Filter by Mammalian Phenotype Ontology phenotype term or ID (use ; as separator)"
-          
-        ),
+            "Enter a list of either IMPC phenotypes or MP terms to filter by"
+          ),
           awesomeCheckbox(
             ns("impc_phenotypes_checkbox"),
-            label = "Filter for all genes with an associated phenotype", 
+            label = "Check to filter for all genes with an associated phenotype", 
             value = FALSE
-          )
-        ),
-        hr(),
-        awesomeCheckbox(
-          ns("mgi_annotations_checkbox"),
-          label = "Enable MGI filters", 
-          value = FALSE
-        ),
-        # F1
-        fluidRow(
-          column(
-            width=8,
-            pickerInput(
-              ns("mgi_viability_filter"),
-              "Viability after knockout",
-              choices = sort(na.omit(unique(mgi_data$mgi_viability))),
-              selected = sort(na.omit(unique(mgi_data$mgi_viability))),
-              multiple = TRUE
-            )
           ),
-          column(
-            width=4,
-            materialSwitch(
-              ns("mgi_viability_na_switch"),
-              "NA switch",
-              value = FALSE
-            )
+          circle = FALSE, status = 'filterBtnClass',
+          icon = icon("sliders"), width = "100%",
+          
+          tooltip = tooltipOptions(title = "Click to see inputs !")
+        ),
+        # MGI UI ----
+        h5("MGI filters"),
+        dropdownButton(
+          awesomeCheckbox(
+            ns("mgi_annotations_checkbox"),
+            label = "Filter for all genes collated by the MGI", 
+            value = FALSE
+          ),
+          hr(),
+          pickerInput(
+            ns("mgi_viability_filter"),
+            "MGI viability",
+            choices = sort(na.omit(unique(mgi_data$mgi_viability))),
+            selected = sort(na.omit(unique(mgi_data$mgi_viability))),
+            multiple = TRUE
+          ),
+          materialSwitch(
+            ns("mgi_viability_na_switch"),
+            "mgi_viability_na_switch",
+            value = TRUE
           )
-        )
+          ,
+          circle = FALSE, status = 'filterBtnClass',
+          icon = icon("sliders"), width = "100%",
+          
+          tooltip = tooltipOptions(title = "Click to see inputs !")
         ),
         # OMIM UI ----
-        box(title = tooltip(
-          trigger = list(
-            "Human disease", 
-            bs_icon("info-circle")
+        h5("OMIM filters"),
+        dropdownButton(
+          awesomeCheckbox(
+            ns("omim_annotations_checkbox"),
+            label = "Filter for all genes with associated OMIM entries", 
+            value = FALSE
           ),
-          "Human disease data from the Online Mendelian Inheritance in Man (OMIM)
-          and the Developmental Disorders (DD) panel in the Gene2Phenotype (G2P) database (DDG2P)"
-        ), 
-        collapsible = TRUE, collapsed = TRUE, width = "100%",
-            awesomeCheckbox(
-              ns("omim_annotations_checkbox"),
-              label = "Enable OMIM filters", 
-              value = FALSE
-            ),
-            fluidRow(
-              column(
-                width = 8,
-              ),
-              column(
-                width = 4,
-              )
-            ),
-            fluidRow(
-              column(
-                width = 8,
-                pickerInput(
-                  ns("omim_lethality_filter"),
-                  "Lethal phenotypes",
-                  choices = sort(na.omit(unique(omim_data$disease_gene_lethal))),
-                  selected = sort(na.omit(unique(omim_data$disease_gene_lethal))),
-                  multiple = TRUE
-                )
-              ),
-              column(
-                width = 4,
-                materialSwitch(
-                  ns("omim_lethality_na_switch"),
-                  "NA switch",
-                  value = FALSE
-                ) |>
-                  tooltip("Switch On/Off to include/exclude missing values")
-              )
-            ),
-            fluidRow(
-              column(
-                width = 8,
-                pickerInput(
-                  ns("omim_earliest_lethality_filter"),
-                  "Earliest lethal phenotype",
-                  choices = sort(na.omit(unique(omim_data$earliest_lethality_category))),
-                  selected = sort(na.omit(unique(omim_data$earliest_lethality_category))),
-                  multiple = TRUE
-                )
-              ),
-              column(
-                width = 4,
-                materialSwitch(
-                  ns("omim_earliest_lethality_na_switch"),
-                  "NA switch",
-                  value = FALSE
-                )
-              )
-            ),
-            fluidRow(
-              column(
-                width = 8,
-                pickerInput(
-                  ns("omim_number_filter"),
-                  "Phenotype molecular basis",
-                  choices = sort(na.omit(unique(omim_data$number_key))),
-                  selected = sort(na.omit(unique(omim_data$number_key))),
-                  multiple = TRUE
-                )
-              ),
-              column(
-                width = 4,
-                materialSwitch(
-                  ns("omim_number_na_switch"),
-                  "NA switch",
-                  value = FALSE
-                )
-              )
-            ),
-            fluidRow(
-              column(
-                width = 8,
-                pickerInput(
-                  ns("omim_moi_filter"),
-                  "Phenotype mode of inheritance",
-                  choices = sort(na.omit(unique(omim_data$moi))),
-                  selected = sort(na.omit(unique(omim_data$moi))),
-                  multiple = TRUE,
-                  options = pickerOptions(
-                    actionsBox = TRUE
-                  )
-                )
-              ),
-              column(
-                width = 4,
-                materialSwitch(
-                  ns("omim_moi_na_switch"),
-                  "NA switch",
-                  value = FALSE
-                ),
-              )
-            ),
-            fluidRow(
-              textAreaInput(
-                ns("omim_phenotypes_filter"),
-                "Filter by OMIM phenotypes or MIM IDs (use ; as separator)"
-              ),
-              awesomeCheckbox(
-                ns("omim_phenotypes_checkbox"),
-                label = "Filter for all genes with an associated phenotype", 
-                value = FALSE
-              )
-            ),
-        hr(),
-        awesomeCheckbox(
-          ns("ddg2p_annotations_checkbox"),
-          label = "Enable DDG2P filters", 
-          value = FALSE
-        ),
-        fluidRow(
-          column(
-            width = 8,
-            pickerInput(
-              ns("ddg2p_allelic_requirement_filter"),
-              "Phenotype allelic requirement",
-              choices = sort(na.omit(unique(ddg2p_data$allelic_requirement))),
-              selected = sort(na.omit(unique(ddg2p_data$allelic_requirement))),
-              multiple = TRUE,
-              options = pickerOptions(
-                actionsBox = TRUE
-              )
+          pickerInput(
+            ns("omim_lethality_filter"),
+            "OMIM lethal phenotypes",
+            choices = sort(na.omit(unique(omim_data$disease_gene_lethal))),
+            selected = sort(na.omit(unique(omim_data$disease_gene_lethal))),
+            multiple = TRUE
+          ),
+          materialSwitch(
+            ns("omim_lethality_na_switch"),
+            "omim_lethality_na_switch",
+            value = TRUE
+          ),
+          pickerInput(
+            ns("omim_earliest_lethality_filter"),
+            "OMIM earliest lethal phenotypes",
+            choices = sort(na.omit(unique(omim_data$earliest_lethality_category))),
+            selected = sort(na.omit(unique(omim_data$earliest_lethality_category))),
+            multiple = TRUE
+          ),
+          materialSwitch(
+            ns("omim_earliest_lethality_na_switch"),
+            "omim_earliest_lethality_na_switch",
+            value = TRUE
+          ),
+          pickerInput(
+            ns("omim_number_filter"),
+            "OMIM molecular basis",
+            choices = sort(na.omit(unique(omim_data$number_key))),
+            selected = sort(na.omit(unique(omim_data$number_key))),
+            multiple = TRUE
+          ),
+          materialSwitch(
+            ns("omim_number_na_switch"),
+            "omim_number_na_switch",
+            value = TRUE
+          ),
+          pickerInput(
+            ns("omim_moi_filter"),
+            "OMIM Mode of inheritance",
+            choices = sort(na.omit(unique(omim_data$moi))),
+            selected = sort(na.omit(unique(omim_data$moi))),
+            multiple = TRUE,
+            options = pickerOptions(
+              actionsBox = TRUE
             )
           ),
-          column(
-            width = 4,
-            materialSwitch(
-              ns("ddg2p_allelic_requirement_na_switch"),
-              "NA switch",
-              value = FALSE
-            )
+          materialSwitch(
+            ns("omim_moi_na_switch"),
+            "omim_moi_na_switch",
+            value = TRUE
+          ),
+          textAreaInput(
+            ns("omim_phenotypes_filter"),
+            "Enter a list of either OMIM phenotypes or phenotype MIM numbers to filter by"
+          ),
+          awesomeCheckbox(
+            ns("omim_phenotypes_checkbox"),
+            label = "Check to filter for all genes with an associated phenotype", 
+            value = FALSE
           )
+          ,
+          circle = FALSE, status = 'filterBtnClass',
+          icon = icon("sliders"), width = "100%",
+          
+          tooltip = tooltipOptions(title = "Click to see inputs !")
         ),
-        fluidRow(
-          column(
-            width = 8,
-            pickerInput(
-              ns("ddg2p_organ_specificity_filter"),
-              "Affected organ(s)",
-              choices = sort(na.omit(unique(ddg2p_data$organ_specificity))),
-              selected = sort(na.omit(unique(ddg2p_data$organ_specificity))),
-              multiple = TRUE,
-              options = pickerOptions(
-                actionsBox = TRUE
-              )
+        # DDG2P UI ----
+        h5("DDG2P filters"),
+        dropdownButton(
+          awesomeCheckbox(
+            ns("ddg2p_annotations_checkbox"),
+            label = "Filter for all genes with associated DDG2P entries", 
+            value = FALSE
+          ),
+          pickerInput(
+            ns("ddg2p_allelic_requirement_filter"),
+            "DDG2P allelic requirement",
+            choices = sort(na.omit(unique(ddg2p_data$allelic_requirement))),
+            selected = sort(na.omit(unique(ddg2p_data$allelic_requirement))),
+            multiple = TRUE,
+            options = pickerOptions(
+              actionsBox = TRUE
             )
           ),
-          column(
-            width = 4,
-            materialSwitch(
-              ns("ddg2p_organ_specificity_na_switch"),
-              "NA switch",
-              value = FALSE
+          materialSwitch(
+            ns("ddg2p_allelic_requirement_na_switch"),
+            "ddg2p_allelic_requirement_na_switch",
+            value = TRUE
+          ),
+          pickerInput(
+            ns("ddg2p_organ_specificity_filter"),
+            "DDG2P affected organ(s)",
+            choices = sort(na.omit(unique(ddg2p_data$organ_specificity))),
+            selected = sort(na.omit(unique(ddg2p_data$organ_specificity))),
+            multiple = TRUE,
+            options = pickerOptions(
+              actionsBox = TRUE
             )
-          )
-        ),
-        fluidRow(
+          ),
+          materialSwitch(
+            ns("ddg2p_organ_specificity_na_switch"),
+            "ddg2p_organ_specificity_na_switch",
+            value = TRUE
+          ),
           textAreaInput(
             ns("ddg2p_disease_name_filter"),
-            "Filter by phenotypes in DD PanelApp (use ; as separator)"
+            "Enter a list of DDG2P phenotypes to filter by"
           ),
-        ),
-        fluidRow(
           awesomeCheckbox(
             ns("ddg2p_disease_name_checkbox"),
             label = "Check to filter for all genes with an associated phenotype", 
             value = FALSE
           )
-        )
-      ),
+          ,
+          circle = FALSE, status = 'filterBtnClass',
+          icon = icon("sliders"), width = "100%",
+          
+          tooltip = tooltipOptions(title = "Click to see inputs !")
+        ),
         # CONSTRAINT UI ----
-        box(title = tooltip(
-          trigger = list(
-            "Constraint scores", 
-            bs_icon("info-circle")
+        h5("Gene constraint filters"),
+        dropdownButton(
+          awesomeCheckbox(
+            ns("constraint_annotations_checkbox"),
+            label = "Enable gene constraint filters", 
+            value = FALSE
           ),
-          HTML("Constraint scores derived from human cell lines and population sequencing studies")
+          sliderInput(ns('mean_score_all_filter'),
+                      label = 'Gene effect score - mean across all DepMap cancer lines',
+                      value = c(min(constraint_data$mean_score_all, na.rm = TRUE), max(constraint_data$mean_score_all, na.rm = TRUE)),
+                      min = min(constraint_data$mean_score_all, na.rm = TRUE),
+                      max(constraint_data$mean_score_all, na.rm = TRUE),
+                      round = 2,
+                      width = "100%"
+          ),
+          materialSwitch(
+            ns("mean_score_all_na_switch"),
+            "mean_score_all_na_switch",
+            value = TRUE
+          ),
+          sliderInput(ns('gnomad_lof_upper_90_ci_filter'),
+                      label = 'gnomAD LOEUF score',
+                      value = c(min(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE), max(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE)),
+                      min = min(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE),
+                      max(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE),
+                      round = 2,
+                      width = "100%"
+          ),
+          materialSwitch(
+            ns("gnomad_lof_upper_90_ci_na_switch"),
+            "gnomad_lof_upper_90_ci_na_switch",
+            value = TRUE
+          ),
+          sliderInput(ns('mean_am_pathogenicity_filter'),
+                      label = 'Alpha Missense pathogenicity prediction (mean)',
+                      value = c(min(constraint_data$mean_am_pathogenicity, na.rm = TRUE), max(constraint_data$mean_am_pathogenicity, na.rm = TRUE)),
+                      min = min(constraint_data$mean_am_pathogenicity, na.rm = TRUE),
+                      max(constraint_data$mean_am_pathogenicity, na.rm = TRUE),
+                      round = 2,
+                      width = "100%"
+          ),
+          materialSwitch(
+            ns("mean_am_pathogenicity_na_switch"),
+            "mean_am_pathogenicity_na_switch",
+            value = TRUE
+          ),
+          sliderInput(ns('shet_rgcme_mean_filter'),
+                      label = 'Shet (author)',
+                      value = c(min(constraint_data$shet_rgcme_mean, na.rm = TRUE), max(constraint_data$shet_rgcme_mean, na.rm = TRUE)),
+                      min = min(constraint_data$shet_rgcme_mean, na.rm = TRUE),
+                      max(constraint_data$shet_rgcme_mean, na.rm = TRUE),
+                      round = 2,
+                      width = "100%"
+          ),
+          materialSwitch(
+            ns("shet_rgcme_mean_na_switch"),
+            "shet_rgcme_mean_na_switch",
+            value = TRUE
+          ),
+          sliderInput(ns('bf_lam_filter'),
+                      label = 'Bayes Factor (Laminin substrate)',
+                      value = c(min(constraint_data$bf_lam, na.rm = TRUE), max(constraint_data$bf_lam, na.rm = TRUE)),
+                      min = min(constraint_data$bf_lam, na.rm = TRUE),
+                      max(constraint_data$bf_lam, na.rm = TRUE),
+                      round = 2,
+                      width = "100%"
+          ),
+          materialSwitch(
+            ns("bf_lam_na_switch"),
+            "bf_lam_na_switch",
+            value = TRUE
+          ),
+          sliderInput(ns('bf_mef_filter'),
+                      label = 'Bayes Factor (Laminin substrate)',
+                      value = c(min(constraint_data$bf_mef, na.rm = TRUE), max(constraint_data$bf_mef, na.rm = TRUE)),
+                      min = min(constraint_data$bf_mef, na.rm = TRUE),
+                      max(constraint_data$bf_mef, na.rm = TRUE),
+                      round = 2,
+                      width = "100%"
+          ),
+          materialSwitch(
+            ns("bf_mef_na_switch"),
+            "bf_mef_na_switch",
+            value = TRUE
+          ),
+          sliderInput(ns('shet_post_mean_filter'),
+                      label = 'Bayes Factor (Laminin substrate)',
+                      value = c(min(constraint_data$shet_post_mean, na.rm = TRUE), max(constraint_data$shet_post_mean, na.rm = TRUE)),
+                      min = min(constraint_data$shet_post_mean, na.rm = TRUE),
+                      max(constraint_data$shet_post_mean, na.rm = TRUE),
+                      round = 2,
+                      width = "100%"
+          ),
+          materialSwitch(
+            ns("shet_post_mean_na_switch"),
+            "shet_post_mean_na_switch",
+            value = TRUE
+          ),
+          sliderInput(ns('domino_filter'),
+                      label = 'Bayes Factor (Laminin substrate)',
+                      value = c(min(constraint_data$domino, na.rm = TRUE), max(constraint_data$domino, na.rm = TRUE)),
+                      min = min(constraint_data$domino, na.rm = TRUE),
+                      max(constraint_data$domino, na.rm = TRUE),
+                      round = 2,
+                      width = "100%"
+          ),
+          materialSwitch(
+            ns("domino_na_switch"),
+            "domino_na_switch",
+            value = TRUE
+          ),
+          sliderInput(ns('scones_filter'),
+                      label = 'Bayes Factor (Laminin substrate)',
+                      value = c(min(constraint_data$scones, na.rm = TRUE), max(constraint_data$scones, na.rm = TRUE)),
+                      min = min(constraint_data$scones, na.rm = TRUE),
+                      max(constraint_data$scones, na.rm = TRUE),
+                      round = 2,
+                      width = "100%"
+          ),
+          materialSwitch(
+            ns("scones_na_switch"),
+            "scones_na_switch",
+            value = TRUE
+          )
+          ,
+          circle = FALSE, status = 'filterBtnClass',
+          icon = icon("sliders"), width = "100%",
+          
+          tooltip = tooltipOptions(title = "Click to see inputs !")
         ),
-            collapsible = TRUE, collapsed = TRUE, width = "100%",
-            awesomeCheckbox(
-              ns("constraint_annotations_checkbox"),
-              label = "Enable all constraint filters", 
-              value = FALSE
-            ),
-            # F1
-        p("Cell lines scores"),
-            sliderInput(ns('mean_score_all_filter'),
-                        label = 'Gene effect score - mean across all DepMap cancer lines',
-                        value = c(min(constraint_data$mean_score_all, na.rm = TRUE), max(constraint_data$mean_score_all, na.rm = TRUE)),
-                        min = min(constraint_data$mean_score_all, na.rm = TRUE),
-                        max(constraint_data$mean_score_all, na.rm = TRUE),
-                        round = 2,
-                        width = "100%"
-            ),
-            materialSwitch(
-              ns("mean_score_all_na_switch"),
-              "NA switch",
-              value = FALSE
-            ) |>
-          tooltip("Switch On/Off to include/exclude missing values"),
-            # F2
-            sliderInput(ns('bf_lam_filter'),
-                        label = 'Bayes Factor (Laminin substrate)',
-                        value = c(min(constraint_data$bf_lam, na.rm = TRUE), max(constraint_data$bf_lam, na.rm = TRUE)),
-                        min = min(constraint_data$bf_lam, na.rm = TRUE),
-                        max(constraint_data$bf_lam, na.rm = TRUE),
-                        round = 2,
-                        width = "100%"
-            ),
-            materialSwitch(
-              ns("bf_lam_na_switch"),
-              "NA switch",
-              value = FALSE
-            ),
-            # F3
-            sliderInput(ns('bf_mef_filter'),
-                        label = 'Bayes Factor (Laminin substrate)',
-                        value = c(min(constraint_data$bf_mef, na.rm = TRUE), max(constraint_data$bf_mef, na.rm = TRUE)),
-                        min = min(constraint_data$bf_mef, na.rm = TRUE),
-                        max(constraint_data$bf_mef, na.rm = TRUE),
-                        round = 2,
-                        width = "100%"
-            ),
-            materialSwitch(
-              ns("bf_mef_na_switch"),
-              "NA switch",
-              value = FALSE
-            ),
-        hr(),
-        p("Population Sequencing scores"),
-        sliderInput(ns('gnomad_lof_upper_90_ci_filter'),
-                    label = 'gnomAD LOEUF score',
-                    value = c(min(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE), max(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE)),
-                    min = min(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE),
-                    max(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE),
-                    round = 2,
-                    width = "100%"
-        ),
-        materialSwitch(
-          ns("gnomad_lof_upper_90_ci_na_switch"),
-          "NA switch",
-          value = FALSE
-        ),
-        # F2
-        sliderInput(ns('mean_am_pathogenicity_filter'),
-                    label = 'Alpha Missense pathogenicity prediction (mean)',
-                    value = c(min(constraint_data$mean_am_pathogenicity, na.rm = TRUE), max(constraint_data$mean_am_pathogenicity, na.rm = TRUE)),
-                    min = min(constraint_data$mean_am_pathogenicity, na.rm = TRUE),
-                    max(constraint_data$mean_am_pathogenicity, na.rm = TRUE),
-                    round = 2,
-                    width = "100%"
-        ),
-        materialSwitch(
-          ns("mean_am_pathogenicity_na_switch"),
-          "NA switch",
-          value = FALSE
-        ),
-        # F3
-        sliderInput(ns('shet_rgcme_mean_filter'),
-                    label = 'Shet (Sun et al. 2023)',
-                    value = c(min(constraint_data$shet_rgcme_mean, na.rm = TRUE), max(constraint_data$shet_rgcme_mean, na.rm = TRUE)),
-                    min = min(constraint_data$shet_rgcme_mean, na.rm = TRUE),
-                    max(constraint_data$shet_rgcme_mean, na.rm = TRUE),
-                    round = 2,
-                    width = "100%"
-        ),
-        materialSwitch(
-          ns("shet_rgcme_mean_na_switch"),
-          "NA switch",
-          value = FALSE
-        ),
-        # F4
-        sliderInput(ns('shet_post_mean_filter'),
-                    label = 'Shet (Zeng et al. 2023)',
-                    value = c(min(constraint_data$shet_post_mean, na.rm = TRUE), max(constraint_data$shet_post_mean, na.rm = TRUE)),
-                    min = min(constraint_data$shet_post_mean, na.rm = TRUE),
-                    max(constraint_data$shet_post_mean, na.rm = TRUE),
-                    round = 2,
-                    width = "100%"
-        ),
-        materialSwitch(
-          ns("shet_post_mean_na_switch"),
-          "NA switch",
-          value = FALSE
-        ),
-        # F5
-        sliderInput(ns('domino_filter'),
-                    label = 'DOMINO',
-                    value = c(min(constraint_data$domino, na.rm = TRUE), max(constraint_data$domino, na.rm = TRUE)),
-                    min = min(constraint_data$domino, na.rm = TRUE),
-                    max(constraint_data$domino, na.rm = TRUE),
-                    round = 2,
-                    width = "100%"
-        ),
-        materialSwitch(
-          ns("domino_na_switch"),
-          "NA switch",
-          value = FALSE
-        ),
-        # F6
-        sliderInput(ns('scones_filter'),
-                    label = 'SCoNeS',
-                    value = c(min(constraint_data$scones, na.rm = TRUE), max(constraint_data$scones, na.rm = TRUE)),
-                    min = min(constraint_data$scones, na.rm = TRUE),
-                    max(constraint_data$scones, na.rm = TRUE),
-                    round = 2,
-                    width = "100%"
-        ),
-        materialSwitch(
-          ns("scones_na_switch"),
-          "NA switch",
-          value = FALSE
-        )
-        ),
-
-       # F1
-
-     # F1
         # GENES BOX FILTER ----
-     box(title = tooltip(
-       trigger = list(
-         "Gene entry", 
-         bs_icon("info-circle")
-       ),
-       HTML("Filter by gene symbol or gene ID")
-     ), collapsible = TRUE, collapsed = TRUE, width = "100%",
-         textAreaInput(
-           ns("gene_list_filter"), 
-           "Filter by gene symbol or ID (HGNC, Ensembl, Entrez, Uniprot)  (use ; as separator)"
-           )
-      )
-     ),
-     # Save filtered lists ----
-      column(
-        width = 6,
-        # Current filtered list ----
-        progressBar(ns("progress_bar"), value = nrow(pcg_data), total = nrow(pcg_data), title = "Number of genes after filtering", display_pct = TRUE),
-        reactableOutput(ns("gene_table")),
-        downloadButton(ns("downloadGenes"), "Download table")
+        h5("Gene sybmols/IDs filter"),
+        dropdownButton(
+          textAreaInput(ns("gene_list_filter"), "Filter by gene symbol or id (hgnc, ensembl, entrez, uniprot)")
+          ,
+          circle = FALSE, status = 'filterBtnClass',
+          icon = icon("sliders"), width = "100%",
+          
+          tooltip = tooltipOptions(title = "Click to see inputs !")
+        )
       ),
-     column(
-       width = 3,
-       p("Save filtered gene list"),
-       fluidRow(
-         column(
-           width = 6,
-           textInput(ns("add_gene_list_name"), label = NULL, placeholder = "Add list name")
-         ),
-         column(
-           width = 3,
-           actionButton(ns("add_gene_list"), "Save")
-         )
-       ),
-       fluidRow(
-         column(
-           width = 6,
-           reactableOutput(ns("saved_lists_table"))
-         ),
-         column(
-           width = 3,
-           actionButton(ns("clear_saved_lists"), "Clear")
-         )
-       )
-     )
+      # Current filtered list ----
+      column(
+        width = 5,
+        h5("Save gene lists"),
+        hr(),
+        actionButton(ns("add_gene_list"), "save gene list"),
+        textInput(ns("add_gene_list_name"), "Add name"),
+        reactableOutput(ns("saved_lists_table")),
+        actionButton(ns("clear_saved_lists"), "clear list(s)")
+      ),
+      # Save filtered lists ----
+      column(
+        width = 3,
+        h5("Current filtered list"),
+        hr(),
+        reactableOutput(ns("gene_table"))
+      )
     )
-    )
+  )
 }
 
 
@@ -584,7 +445,6 @@ server <- function(id, data_list) {
     omim_data <- data_list[["omim_data"]]
     ddg2p_data <- data_list[["ddg2p_data"]]
     constraint_data <- data_list[["constraint_data"]]
-    tbl_all <- data_list[["tbl_all"]]
     
     # Filters ----
     
@@ -1021,20 +881,14 @@ server <- function(id, data_list) {
       filtered_genes_overlap3 <- intersect(filtered_genes_overlap2, filtered_genes_ddg2p1$gene_symbol)
       filtered_genes_overlap4 <- intersect(filtered_genes_overlap3, filtered_genes_mgi1$gene_symbol)
       filtered_genes_overlap5 <- intersect(filtered_genes_overlap4, filtered_genes_genelist1$gene_symbol)
-      updateProgressBar(session = session, id = "progress_bar", value = length(filtered_genes_overlap5), total = nrow(pcg_data), 
-                        title = "Number of genes after filtering")
+      
       filtered_genes(filtered_genes_overlap5)
     })
     
     # Tables----
     output$gene_table <- renderReactable({
-      # df <- as.data.frame(filtered_genes())
-      # df <- setNames(df, "Current filtered gene list")
-      df <- tbl_all %>%
-        dplyr::filter(gene_symbol %in% filtered_genes())
-      df <- setNames(df, c("Gene Symbol", "HGNC ID", "Mouse ortholog", "IMPC Viability", "DepMap mean gene effect", "gnomAD LOEUF"))
       reactable(
-        df
+        as.data.frame(filtered_genes())
       )
     })
     
@@ -1078,15 +932,6 @@ server <- function(id, data_list) {
       shinyjs::reset("add_gene_list_name")
     })
     
-    observe({
-      # If add_gene_list_name is empty, disable the add_gene_list button
-      if (length(saved_lists()) == 0) {
-        shinyjs::hide("clear_saved_lists")
-      } else {
-        shinyjs::show("clear_saved_lists")
-      }
-    })
-    
     # Render list of gene lists as table
     output$saved_lists_table <- renderReactable({
       req(length(saved_lists()) > 0)
@@ -1095,9 +940,7 @@ server <- function(id, data_list) {
       list_lengths <- sapply(saved_lists_data, length)
       
       # Create a data frame containing list names and their lengths
-      table_data <- data.frame(list_names = list_names, list_length = list_lengths,
-                               row.names = NULL)
-      table_data <- setNames(table_data, c("List name", "List length"))
+      table_data <- data.frame(List_Name = list_names, Length = list_lengths)
       # Render the table using reactable
       reactable(table_data)
     })
@@ -1155,8 +998,6 @@ server <- function(id, data_list) {
       shinyjs::reset("domino_na_switch")
       shinyjs::reset("scones_filter")
       shinyjs::reset("scones_na_switch")
-      shinyjs::reset("gene_list_filter")
-      
     })
     
     # Reset list

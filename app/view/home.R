@@ -1,7 +1,8 @@
 box::use(
   shiny[bootstrapPage, fluidRow, column, moduleServer, NS, renderUI, tags, uiOutput, textOutput, tagList, br, actionButton,
-        h5, p],
+        h5, h4, p, hr],
   bslib[page_navbar, nav_panel, card, card_header, card_body],
+  htmltools[HTML]
 )
 
 #' @export
@@ -10,45 +11,94 @@ ui <- function(id) {
   
   shiny::tagList(
     fluidRow(
-      column(
-        width = 12,
-        align = "center",
-        h5("Essential genes explorer is designed for two main purposes:"),
-        p("1) Filtering gene lists (human protein-coding genes)"),
-        p("2) Characterising gene lists based on metadata and metrics related to gene essentiality"),
-        br(),
-        h5("Data used by essential genes explorer:"),
-        p("Mouse knockouts, Human diseases, Gene constraint metrics, Gene Ontologies, Pathways and Protein families"),
-        br(),
-        h5("How to use Essential genes explorer:"),
-        p("Navigate to either the 'Filters' or 'Characterise & Compare' page"),
-        p("Filters: refine an initial custom list of genes or the list of all protein coding genes"),
-        p("Characterise & Compare: Upload a gene list and view/interact with the resulting plots")
-      )
+      style = "text-align: center;",
+      h4("Welcome to Essential Genes Explorer")
     ),
-    
+    br(),
     fluidRow(
+      style = "text-align: center;",
       column(
-        width = 5,
-        align = "center",  # Offset to push the first column to the right
-        shiny::actionButton(
-          ns("filter_button"),
-          label = "Filter genes",
-          style = "color: #FFF; background-color: #9C5CFF; border-color: #007bff;"
-        )
+        width = 6,
+        h5("Background:"),
+        p("The spectrum of gene essentiality plays a crucial role in the discovery of novel gene-disease associations. 
+          Genes can be categorized based on their essentiality for an organism's survival or reproduction, ranging from indispensable to dispensable. 
+          Understanding this spectrum allows us to prioritize candidate genes for disease association studies. 
+          By integrating knowledge of gene essentiality with genomic and clinical data, we can identify novel gene-disease associations, facilitating targeted therapies and advancing our understanding of disease mechanisms.")
       ),
       column(
-        width = 5,
-        align = "center",
-        shiny::actionButton(
-          ns("characterise_button"),
-          label = "Characterise gene list and compare against other lists",
-          style = "color: #FFF; background-color: #9C5CFF; border-color: #007bff;"
+        width = 6,
+        h5("Primary functionalities:"),
+        p("1) Filter tab: Find gene sets within or outside the intersections of gene essentiality data resources."),
+        p("2) Plots tab: Characterise gene lists based on metadata and metrics related to gene essentiality."),
+        p("3) Enrichment analysis tab: Perform GO or Pathway enrichment analysis of a gene set.")
+      )
+    ),
+    hr(),
+    fluidRow(
+      style = "text-align: center;",
+      column(
+        width = 6,
+        h5("Data used by essential genes explorer:"),
+        p(HTML("Mouse knockouts<br> Human diseases<br> Gene constraint metrics<br> Gene Ontologies<br> Pathways<br> Protein families"))
+      ),
+      column(
+        width = 6,
+        fluidRow(
+          column(
+            width = 6,
+            shiny::img(src = "static/impc.png", style = "height: 50px;")
+          ),
+          column(
+            width = 6,
+            shiny::img(src = "static/mgi.png", style = "height: 50px;")
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6,
+            shiny::img(src = "static/omim.png", style = "height: 50px;")
+          ),
+          column(
+            width = 6,
+            shiny::img(src = "static/g2p.png", style = "height: 50px;")
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6,
+            shiny::img(src = "static/gnomad.png", style = "height: 50px;")
+          ),
+          column(
+            width = 6,
+            shiny::img(src = "static/depmap.png", style = "height: 50px;")
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6,
+            shiny::img(src = "static/reactome.png", style = "height: 50px;")
+          ),
+          column(
+            width = 6,
+            shiny::img(src = "static/go.png", style = "height: 50px;")
+          )
         )
       )
     ),
-    
-    
+    hr(),
+    fluidRow(
+      style = "text-align: center;",
+      h5("Relevant publications:"),
+      p(
+        HTML("<a href='https://doi.org/10.1007/s00335-023-09984-1' target='_blank'>Essential genes: a cross-species perspective.</a> Mamm Genome. 2023; doi:10.1007/s00335-023-09984-1. PMID: 3689735."
+        )
+      ),
+      p(
+        HTML("<a href='https://doi.org/10.1038/s41467-020-14284-2' target='_blank'>Human and mouse essentiality screens as a resource for disease gene discovery.</a> Nat Commun. 2020 Jan 31; doi:10.1038/s41467-020-14284-2. PMID: 32005800; PMCID: PMC6994715."
+        )
+      )
+    ),
+    hr(),
     fluidRow(
       column(
         width = 12,

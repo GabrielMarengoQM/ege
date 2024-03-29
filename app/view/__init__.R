@@ -5,5 +5,6 @@
 box::use(
   app/view/filters,
   app/view/home,
-  app/view/plots
+  app/view/plots,
+  app/view/enrichment
 )

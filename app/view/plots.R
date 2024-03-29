@@ -1,8 +1,11 @@
 # Load packages and their specific functions used
 box::use(
-  shiny[fluidRow, column, moduleServer, NS, tagList, h5, req],
+  shiny[fluidRow, column, moduleServer, NS, tagList, h5, req, renderText, textOutput, observe],
   plotly[plotlyOutput, renderPlotly, plot_ly],
-  fst[read.fst]
+  fst[read.fst],
+  shinyjs[show, hide, useShinyjs],
+  htmltools[HTML],
+  bslib[navset_card_underline, nav_panel]
 )
 
 # Import helper functions
@@ -15,11 +18,15 @@ ui <- function(id) {
   ns <- NS(id)
   
   tagList(
+    useShinyjs(),
     fluidRow(
       column(
         width = 12,
         offset = 4,
-        h5("Mouse models visualisations")
+        # h5("Mouse models visualisations"),
+        # h5("Save a gene list in the Filter tab to view plots"),
+        textOutput(ns("mouse_plot_title")),
+        textOutput(ns("save_genes_msg"))
       )
     ),
     # IMPC PLOTS UI----
@@ -141,16 +148,26 @@ ui <- function(id) {
 #' @export
 server <- function(id, filters_data, data_list) {
   moduleServer(id, function(input, output, session) {
-    # constraint_data <- read.fst("./data/constraint_metrics.fst")
-    # impc_data <- read.fst("/Users/gabrielm/Desktop/gene_annotations/data/processed/test_impc.fst")
-    # mgi_data <- read.fst("/Users/gabrielm/Desktop/gene_annotations/data/processed/mouse.viability.mgi.fst")
-    # omim_data <- read.fst("/Users/gabrielm/Desktop/gene_annotations/data/processed/omim_data.fst")
-    # ddg2p_data <- read.fst("/Users/gabrielm/Desktop/gene_annotations/data/processed/ddg2p.fst")
+    
     impc_data <- data_list[["impc_data"]]
     mgi_data <- data_list[["mgi_data"]]
     omim_data <- data_list[["omim_data"]]
     ddg2p_data <- data_list[["ddg2p_data"]]
     constraint_data <- data_list[["constraint_data"]]
+    
+    output$mouse_plot_title <- renderText({HTML("PLOTS TITLE")})
+    output$save_genes_msg <- renderText({HTML("SAVE LIST BEFORE VEIWING")})
+    
+    # Show/hide message
+    observe({
+      # If add_gene_list_name is empty, disable the add_gene_list button
+      if (length(filters_data$gene_lists()) == 0) {
+        shinyjs::hide("mouse_plot_title")
+        shinyjs::show("save_genes_msg")
+      } else {
+        shinyjs::show("mouse_plot_title")
+        shinyjs::hide("save_genes_msg")      }
+    })
     
     
     # IMPC PLOTS SERVER----

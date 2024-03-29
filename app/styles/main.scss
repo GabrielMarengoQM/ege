@@ -1,0 +1,42 @@
+// Define a SCSS class to apply 100% width
+.full-width {
+  width: 100% !important; 
+}
+
+// Apply the full-width class to elements with the specified class
+.btn.btn-filterBtnClass.action-button.dropdown-toggle.shiny-bound-input {
+  @extend .full-width; 
+}
+
+// Apply the full-width class to elements with the specified class
+.btn-filterBtnClass {
+  @extend .full-width;
+}
+
+.box.collapsed-box {
+  margin-bottom: 10px !important;
+}
+
+.box {
+  margin-bottom: 10px !important;
+}
+
+/* CSS for arranging elements within filterHeader div */
+.filterHeader {
+    display: flex; /* Use Flexbox layout */
+    align-items: center; /* Center items vertically */
+}
+
+/* CSS for h5 element */
+.col-auto.h5-column {
+    margin-right: 10px; /* Adjust margin as needed */
+}
+
+/* CSS for actionButton */
+.col-auto.actionButton-column {
+    margin-left: auto; /* Push actionButton to the right */
+}
+
+.shiny-input-text.form-control.shinyjs-resettable.shiny-bound-input {
+  height: 46.6px !important;
+}
