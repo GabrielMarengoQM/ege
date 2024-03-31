@@ -38,8 +38,8 @@ ui <- function(id) {
       style = "text-align: center;",
       column(
         width = 6,
-        h5("Data used by essential genes explorer:"),
-        p(HTML("Mouse knockouts<br> Human diseases<br> Gene constraint metrics<br> Gene Ontologies<br> Pathways<br> Protein families"))
+        h5("Data resources:"),
+        p(HTML("Mouse knockouts<br> Human diseases<br> Gene constraint metrics<br> Gene Ontologies<br> Pathways<br> Protein families (coming soon)"))
       ),
       column(
         width = 6,

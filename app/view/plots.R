@@ -1,11 +1,13 @@
 # Load packages and their specific functions used
 box::use(
-  shiny[fluidRow, column, moduleServer, NS, tagList, h5, req, renderText, textOutput, observe],
+  shiny[fluidRow, column, moduleServer, NS, tagList, h5, req, renderText, textOutput, observe,
+        uiOutput, renderUI, downloadHandler, downloadButton],
   plotly[plotlyOutput, renderPlotly, plot_ly],
   fst[read.fst],
   shinyjs[show, hide, useShinyjs],
   htmltools[HTML],
-  bslib[navset_card_underline, nav_panel]
+  bslib[navset_card_underline, nav_panel, nav_spacer, card],
+  reactable[reactableOutput, renderReactable, reactable]
 )
 
 # Import helper functions
@@ -16,131 +18,94 @@ box::use(
 #' @export
 ui <- function(id) {
   ns <- NS(id)
-  
   tagList(
     useShinyjs(),
-    fluidRow(
-      column(
-        width = 12,
-        offset = 4,
-        # h5("Mouse models visualisations"),
-        # h5("Save a gene list in the Filter tab to view plots"),
-        textOutput(ns("mouse_plot_title")),
-        textOutput(ns("save_genes_msg"))
-      )
-    ),
     # IMPC PLOTS UI----
     fluidRow(
-      column(
-        width = 3,
-        plotlyOutput(ns("impc_viability_plot"))
-      ),
-      column(
-        width = 3,
-        plotlyOutput(ns("impc_wol_plot"))
-      ),
-      column(
-        width = 3,
-        plotlyOutput(ns("impc_zygosity_plot"))
-      ),
-      column(
-        width = 3,
-        plotlyOutput(ns("ortholog_mapping_plot"))
-      )
+      fluidRow(
+        textOutput(ns("plots_msg")),
+        uiOutput(ns("mouse_plots"))
+        )
     ),
     # MGI PLOTS UI----
-    fluidRow(
-      column(
-        width = 3,
-        plotlyOutput(ns("mgi_viability_plot"))
-      )
-    ),
-    fluidRow(
-      column(
-        width = 12,
-        h5("Disease visualisations")
-      ),
-    ),
+    # fluidRow(
+    #   column(
+    #     width = 12,
+    #     h5("Disease visualisations")
+    #   )
+    # ),
     # OMIM PLOTS UI----
     fluidRow(
-      column(
-        width =3,
-        plotlyOutput(ns("omim_disease_gene_lethal_plot"))
-      ),
-      column(
-        width =3,
-        plotlyOutput(ns("omim_earliest_lethality_category_plot"))
-      ),
-      column(
-        width =3,
-        plotlyOutput(ns("omim_moi_plot"))
-      )
+      uiOutput(ns("disease_plots"))
     ),
     # DDG2P PLOTS UI----
-    fluidRow(
-      column(
-        width = 3,
-        plotlyOutput(ns("ddg2p_allelic_requirement_plot"))
-      ),
-      column(
-        width = 3,
-        plotlyOutput(ns("ddg2p_organ_specificity_plot"))
-      )
-    ),
+    # fluidRow(
+    #   column(
+    #     width = 3,
+    #     plotlyOutput(ns("ddg2p_allelic_requirement_plot"))
+    #   ),
+    #   column(
+    #     width = 3,
+    #     plotlyOutput(ns("ddg2p_organ_specificity_plot"))
+    #   )
+    # ),
     # SEQUENCING METRICS UI----
     fluidRow(
-      column(
-        width = 12,
-        h5("Intolerance to variation (sequencing) visualisations")
-      ),
+      uiOutput(ns("constraint_plots"))
     ),
-    fluidRow(
-      column(
-        width = 2,
-        plotlyOutput(ns("gnomad_lof_upper_90_ci_plot"))
-      ),
-      column(
-        width = 2,
-        plotlyOutput(ns("mean_am_pathogenicity_plot"))
-      ),
-      column(
-        width = 2,
-        plotlyOutput(ns("shet_rgcme_mean_plot"))
-      ),
-      column(
-        width = 2,
-        plotlyOutput(ns("shet_post_mean_plot"))
-      ),
-      column(
-        width = 2,
-        plotlyOutput(ns("domino_plot"))
-      ),
-      column(
-        width = 2,
-        plotlyOutput(ns("scones_plot"))
-      )
-    ),
+    # fluidRow(
+    #   column(
+    #     width = 12,
+    #     h5("Intolerance to variation (sequencing) visualisations")
+    #   ),
+    # ),
+    # fluidRow(
+    #   column(
+    #     width = 2,
+    #     plotlyOutput(ns("gnomad_lof_upper_90_ci_plot"))
+    #   ),
+    #   column(
+    #     width = 2,
+    #     plotlyOutput(ns("mean_am_pathogenicity_plot"))
+    #   ),
+    #   column(
+    #     width = 2,
+    #     plotlyOutput(ns("shet_rgcme_mean_plot"))
+    #   ),
+    #   column(
+    #     width = 2,
+    #     plotlyOutput(ns("shet_post_mean_plot"))
+    #   ),
+    #   column(
+    #     width = 2,
+    #     plotlyOutput(ns("domino_plot"))
+    #   ),
+    #   column(
+    #     width = 2,
+    #     plotlyOutput(ns("scones_plot"))
+    #   )
+    # ),
     # CELL LINES METRICS UI----
-    fluidRow(
-      column(
-        width = 12,
-        h5("Intolerance to variation (cell lines) visualisations")
-      ),
-    ),
-    fluidRow(
-      column(
-        width = 2,
-        plotlyOutput(ns("mean_score_all_plot"))
-      ),
-      column(
-        width = 2,
-        plotlyOutput(ns("bf_lam_plot"))
-      ),
-      column(
-        width = 2,
-        plotlyOutput(ns("bf_mef_plot"))
-      )
-    )
+    # fluidRow(
+    #   column(
+    #     width = 12,
+    #     h5("Intolerance to variation (cell lines) visualisations")
+    #   ),
+    # ),
+    # fluidRow(
+    #   column(
+    #     width = 2,
+    #     plotlyOutput(ns("mean_score_all_plot"))
+    #   ),
+    #   column(
+    #     width = 2,
+    #     plotlyOutput(ns("bf_lam_plot"))
+    #   ),
+    #   column(
+    #     width = 2,
+    #     plotlyOutput(ns("bf_mef_plot"))
+    #   )
+    # )
   )
   
 }
@@ -160,13 +125,173 @@ server <- function(id, filters_data, data_list) {
     
     # Show/hide message
     observe({
-      # If add_gene_list_name is empty, disable the add_gene_list button
       if (length(filters_data$gene_lists()) == 0) {
-        shinyjs::hide("mouse_plot_title")
-        shinyjs::show("save_genes_msg")
+        shinyjs::show("plots_msg")
+        shinyjs::hide("mouse_plots")
+        shinyjs::hide("disease_plots")
+        shinyjs::hide("constraint_plots")
+        
       } else {
-        shinyjs::show("mouse_plot_title")
-        shinyjs::hide("save_genes_msg")      }
+        shinyjs::hide("plots_msg")
+        shinyjs::show("mouse_plots")
+        shinyjs::show("disease_plots")
+        shinyjs::show("constraint_plots")
+        
+        }
+    })
+    
+    output$plots_msg <- renderText({
+      HTML("To view plots, first save a gene list using the 'Filter' tab ")
+    })
+    
+    output$mouse_plots <- renderUI({
+      tagList(
+        navset_card_underline(
+          nav_panel("IMPC",
+                    fluidRow(
+                      column(
+                        width = 3,
+                        card(plotlyOutput(session$ns("impc_viability_plot")),
+                             full_screen = TRUE)
+                      ),
+                      column(
+                        width = 3,
+                        card(plotlyOutput(session$ns("impc_wol_plot")),
+                             full_screen = TRUE)
+                      ),
+                      column(
+                        width = 3,
+                        card(plotlyOutput(session$ns("impc_zygosity_plot")),
+                             full_screen = TRUE)
+                      ),
+                      column(
+                        width = 3,
+                        card(plotlyOutput(session$ns("ortholog_mapping_plot")),
+                             full_screen = TRUE)
+                      )
+                    )
+          ),
+        nav_panel("MGI",
+                  fluidRow(
+                    column(
+                      width = 3,
+                      card(plotlyOutput(session$ns("mgi_viability_plot")),
+                           full_screen = TRUE)
+                    )
+                  )
+                ),
+        nav_spacer(),
+        nav_panel("Data table",
+                  fluidRow(
+                    reactableOutput(session$ns("impc_table"))
+                    )
+                  # ,
+                  # fluidRow(
+                  #   downloadButton(session$ns("download_impc_table"))
+                  # )
+                  ),
+          header = "Mouse knockouts"
+        
+        )
+      )
+    })
+    
+    output$disease_plots <- renderUI({
+      navset_card_underline(
+        nav_panel("OMIM",
+                  fluidRow(
+                    column(
+                      width =3,
+                      card(plotlyOutput(session$ns("omim_disease_gene_lethal_plot")),
+                           full_screen = TRUE)
+                    ),
+                    column(
+                      width =3,
+                      card(plotlyOutput(session$ns("omim_earliest_lethality_category_plot")),
+                           full_screen = TRUE)
+                    ),
+                    column(
+                      width =3,
+                      card(plotlyOutput(session$ns("omim_moi_plot")),
+                           full_screen = TRUE)
+                    )
+                  )
+                  
+                ),
+        nav_panel("DDG2P",
+                  fluidRow(
+                    column(
+                      width = 3,
+                      card(plotlyOutput(session$ns("ddg2p_allelic_requirement_plot")),
+                           full_screen = TRUE)
+                    ),
+                    column(
+                      width = 3,
+                      card(plotlyOutput(session$ns("ddg2p_organ_specificity_plot")),
+                           full_screen = TRUE)
+                    )
+                  )
+                )
+      )
+    })
+    
+    output$constraint_plots <- renderUI({
+      navset_card_underline(
+        nav_panel("Cell line metrics",
+                  fluidRow(
+                    column(
+                      width = 2,
+                      card(plotlyOutput(session$ns("mean_score_all_plot")),
+                           full_screen = TRUE)
+                    ),
+                    column(
+                      width = 2,
+                      card(plotlyOutput(session$ns("bf_lam_plot")),
+                           full_screen = TRUE)
+                    ),
+                    column(
+                      width = 2,
+                      card(plotlyOutput(session$ns("bf_mef_plot")),
+                           full_screen = TRUE)
+                    )
+                  )
+                  
+        ),
+        nav_panel("Population sequencing metrics",
+                  fluidRow(
+                    column(
+                      width = 2,
+                      card(plotlyOutput(session$ns("gnomad_lof_upper_90_ci_plot")),
+                           full_screen = TRUE)
+                    ),
+                    column(
+                      width = 2,
+                      card(plotlyOutput(session$ns("mean_am_pathogenicity_plot")),
+                           full_screen = TRUE)
+                    ),
+                    column(
+                      width = 2,
+                      card(plotlyOutput(session$ns("shet_rgcme_mean_plot")),
+                           full_screen = TRUE)
+                    ),
+                    column(
+                      width = 2,
+                      card(plotlyOutput(session$ns("shet_post_mean_plot")),
+                           full_screen = TRUE)
+                    ),
+                    column(
+                      width = 2,
+                      card(plotlyOutput(session$ns("domino_plot")),
+                           full_screen = TRUE)
+                    ),
+                    column(
+                      width = 2,
+                      card(plotlyOutput(session$ns("scones_plot")),
+                           full_screen = TRUE)
+                    )
+                  ),
+        )
+      )
     })
     
     
@@ -190,6 +315,19 @@ server <- function(id, filters_data, data_list) {
       req(length(filters_data$gene_lists()) > 0)
       plots_logic$barChart(filters_data$gene_lists(), impc_data, "ortholog_mapping", "Ortholog mapping")
     })
+    
+    output$impc_table <- renderReactable({
+      reactable(impc_data)
+    })
+    
+    # output$download_impc_table <- downloadHandler(
+    #   filename = function() {
+    #     "gene_list.txt"
+    #   },
+    #   content = function(file) {
+    #     write.csv(impc_data, file, quote = FALSE, row.names = FALSE)
+    #   }
+    # )
     
     # MGI PLOTS SERVER----
     output$mgi_viability_plot <- renderPlotly({

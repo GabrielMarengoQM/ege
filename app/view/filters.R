@@ -20,6 +20,10 @@ box::use(
   shinydashboard[...]
 )
 
+box::use(
+  app/logic/filters_logic
+)
+
 #' @export
 ui <- function(id, data_list) {
   ns <- NS(id)
@@ -48,12 +52,11 @@ ui <- function(id, data_list) {
                 actionButton(ns("reset_filters"), "Reset")
             )
         ),
-        br(),
+        p("Click + to expand filters"),
         # IMPC UI ----
         box(title = tooltip(
           trigger = list(
-            "Mouse models",
-            bs_icon("info-circle")
+            "Mouse models"
           ),
           HTML("Knockout mouse data from the International Mouse Phenotyping Consortium (IMPC) and the
                Mouse Genome Informatics (MGI) databases")
@@ -193,8 +196,7 @@ ui <- function(id, data_list) {
         # OMIM UI ----
         box(title = tooltip(
           trigger = list(
-            "Human disease", 
-            bs_icon("info-circle")
+            "Human disease"
           ),
           "Human disease data from the Online Mendelian Inheritance in Man (OMIM)
           and the Developmental Disorders (DD) panel in the Gene2Phenotype (G2P) database (DDG2P)"
@@ -377,8 +379,7 @@ ui <- function(id, data_list) {
         # CONSTRAINT UI ----
         box(title = tooltip(
           trigger = list(
-            "Constraint scores", 
-            bs_icon("info-circle")
+            "Constraint scores"
           ),
           HTML("Constraint scores derived from human cell lines and population sequencing studies")
         ),
@@ -525,15 +526,24 @@ ui <- function(id, data_list) {
         # GENES BOX FILTER ----
      box(title = tooltip(
        trigger = list(
-         "Gene entry", 
-         bs_icon("info-circle")
+         "Gene list upload/entry"
        ),
        HTML("Filter by gene symbol or gene ID")
      ), collapsible = TRUE, collapsed = TRUE, width = "100%",
          textAreaInput(
            ns("gene_list_filter"), 
-           "Filter by gene symbol or ID (HGNC, Ensembl, Entrez, Uniprot)  (use ; as separator)"
-           )
+           "Filter by gene symbol or ID (HGNC, Ensembl, Entrez)  (use ; as separator)"
+           ),
+     p("Files uploaded will automatically be saved"),
+     fileInput(
+       ns("user_files_upload"),
+       "Upload gene list(s) as csv or tsv",
+       multiple = TRUE,
+       accept = NULL,
+       width = "100%",
+       buttonLabel = "Browse...",
+       placeholder = "No file selected"
+     )
       )
      ),
      # Save filtered lists ----
@@ -991,9 +1001,10 @@ server <- function(id, data_list) {
               return("ensembl_gene_id")
             } else if (grepl("^[0-9]+$", identifier)) {
               return("entrez_id")
-            } else if (grepl("^[A-Za-z][0-9]", identifier)) {
-              return("uniprot_id")
-            }
+            } 
+            # else if (grepl("^[A-Za-z][0-9]", identifier)) {
+            #   return("uniprot_id")
+            # }
           }
           # If none of the patterns match, assume gene symbol
           return("gene_symbol")
@@ -1044,9 +1055,10 @@ server <- function(id, data_list) {
         "gene_list.txt"
       },
       content = function(file) {
-        # Write gene list to text file using write.fst
-        genes <- filtered_genes()
-        write.csv(genes, file, quote = FALSE, row.names = FALSE)
+        df <- tbl_all %>%
+          dplyr::filter(gene_symbol %in% filtered_genes())
+        df <- setNames(df, c("Gene Symbol", "HGNC ID", "Mouse ortholog", "IMPC Viability", "DepMap mean gene effect", "gnomAD LOEUF")) 
+        write.csv(df, file, quote = FALSE, row.names = FALSE)
       }
     )
     
@@ -1062,6 +1074,12 @@ server <- function(id, data_list) {
     
     saved_lists <- shiny::reactiveVal(list())
     # SAVED LISTS SERVER ----
+    observeEvent(input$user_files_upload, {
+      lists <- filters_logic$userFilesUploadToList(input$user_files_upload, FALSE)
+      current_lists <- saved_lists()
+      combined_lists <- c(current_lists, lists)
+      saved_lists(combined_lists)
+    })
     
     # Add gene list when button clicked
     observeEvent(input$add_gene_list, {
@@ -1156,12 +1174,13 @@ server <- function(id, data_list) {
       shinyjs::reset("scones_filter")
       shinyjs::reset("scones_na_switch")
       shinyjs::reset("gene_list_filter")
-      
+      shinyjs::reset("user_files_upload")
     })
     
     # Reset list
     observeEvent(input$clear_saved_lists, {
       saved_lists(NULL)
+      shinyjs::reset("user_files_upload")
     })
     
     # Pass lists to other modules

@@ -4,5 +4,6 @@
 #' @export
 box::use(
   app/logic/plots_logic,
-  app/logic/enrichment_logic
+  app/logic/enrichment_logic,
+  app/logic/filters_logic
 )

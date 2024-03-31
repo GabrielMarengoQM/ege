@@ -1,13 +1,15 @@
 # Load packages and their specific functions used
 box::use(
   shiny[fluidRow, column, moduleServer, NS, tagList, h5, req, observe, actionButton,
-        observeEvent, reactiveVal, withProgress, incProgress, numericInput, p, plotOutput, renderPlot],
+        observeEvent, reactiveVal, withProgress, incProgress, numericInput, p, plotOutput, renderPlot,
+        renderText, textOutput, htmlOutput, renderUI],
   shinyWidgets[pickerInput, updatePickerInput, materialSwitch],
   plotly[plotlyOutput, renderPlotly, plot_ly, ggplotly],
   fst[read.fst],
   htmltools[HTML],
   reactable[reactable, reactableOutput, renderReactable],
-  bslib[navset_card_underline, nav_panel]
+  bslib[navset_card_underline, nav_panel],
+  promises[...]
 )
 
 # Import helper functions
@@ -22,7 +24,10 @@ ui <- function(id, filters_data) {
   navset_card_underline(
     # Panel with plot ----
     nav_panel("Semantic similarity analysis (GO)",
-              plotlyOutput(ns("semnatic_similarity_plot")),
+              #htmlOutput(ns("go_plots_msg_1")),
+              htmlOutput(ns("go_plots_msg_2")),
+              htmlOutput(ns("go_error_msg")),
+              plotlyOutput(ns("semantic_similarity_plot")),
               reactableOutput(ns("enriched_terms_table")),
               p("Options"),
               fluidRow(
@@ -48,6 +53,9 @@ ui <- function(id, filters_data) {
     
     # Panel with summary ----
     nav_panel("Pathway enrichment analysis (Reactome)",
+              #htmlOutput(ns("reactome_plots_msg_1")),
+              htmlOutput(ns("reactome_plots_msg_2")),
+              htmlOutput(ns("reactome_error_msg")),
               plotOutput(ns("reactome_plot")),
               reactableOutput(ns("reactome_table")),
               p("Options"),
@@ -66,6 +74,78 @@ server <- function(id, filters_data, data_list) {
   moduleServer(id, function(input, output, session) {
     
     # GO ----
+    output$go_plots_msg_1 <- renderUI({
+      HTML("To perform enrichment analysis, first save a gene list using the 'Filter' tab. <br>
+           Then select your gene list and parameters of choice then click 'Analyse'")
+    })
+    
+    output$go_plots_msg_2 <- renderUI({
+      HTML("To perform enrichment analysis, select your gene list and parameters of choice then click 'Analyse'")
+    })
+    
+    output$reactome_plots_msg_1 <- renderUI({
+      HTML("To perform enrichment analysis, first save a gene list using the 'Filter' tab.<br>
+           Then select your gene list and parameters of choice then click 'Analyse'")
+    })
+    
+    output$reactome_plots_msg_2 <- renderUI({
+      HTML("To perform enrichment analysis, select your gene list and parameters of choice then click 'Analyse'")
+    })
+    
+    
+    output$reactome_error_msg <- renderUI({
+      HTML("Error in enrichment analysis: No enriched terms found.<br>Please try again with a different gene list")
+    })
+    
+    output$go_error_msg <- renderUI({
+      HTML("Error in enrichment analysis: No enriched terms found.<br>Please try again with a different gene list")
+    })
+    
+    # Show/hide message
+    observe({
+      # If add_gene_list_name is empty, disable the add_gene_list button
+      if (length(filters_data$gene_lists()) == 0) {
+        #shinyjs::show("go_plots_msg_1")
+        #shinyjs::hide("go_plots_msg_2")
+        
+        #shinyjs::show("reactome_plots_msg_1")
+        #shinyjs::hide("reactome_plots_msg_2")
+        
+        # shinyjs::hide("semantic_similarity_plot")
+        # shinyjs::hide("reactome_plot")
+      } else {
+        #shinyjs::hide("go_plots_msg_1")
+        #shinyjs::show("go_plots_msg_2")
+        
+        #shinyjs::hide("reactome_plots_msg_1")
+        #shinyjs::show("reactome_plots_msg_2")
+        
+        # shinyjs::show("semantic_similarity_plot")
+        # shinyjs::show("reactome_plot")
+      }
+      
+      if (is.null(enriched_terms_val())) {
+        shinyjs::show("go_plots_msg_2")
+        shinyjs::hide("semantic_similarity_plot")
+        
+        
+      } else {
+        shinyjs::hide("go_plots_msg_2")
+        shinyjs::show("semantic_similarity_plot")
+        
+      }
+      
+      if (is.null(reactome_enrichment_output())) {
+        shinyjs::show("reactome_plots_msg_2")
+        shinyjs::hide("reactome_plot")
+        
+      } else {
+        shinyjs::hide("reactome_plots_msg_2")
+        shinyjs::show("reactome_plot")
+        
+      }
+    })
+    
     # Update gene list selector
     observe({
       updatePickerInput(
@@ -78,6 +158,7 @@ server <- function(id, filters_data, data_list) {
     
     # Get enriched terms
     enriched_terms_val <- reactiveVal(NULL)
+    go_error_msg_val <- reactiveVal(NULL)
     observeEvent(input$get_go_plot, {
       # Get enriched terms
       withProgress(message="Calculating enrichment, this may take a while...", value=0, { 
@@ -89,21 +170,41 @@ server <- function(id, filters_data, data_list) {
         p_val <- input$p_val_input
         q_val <- input$q_val_input
        
-        enriched_terms <- enrichment_logic$getEnrichedGoTerms(gene_list, background, ontology, p_val, q_val)
+        tryCatch({
+          enriched_terms <- enrichment_logic$getEnrichedGoTerms(gene_list, background, ontology, p_val, q_val)
+          # Get plot
+          withProgress(message="Calculating similarity, this may take a while...", value=0, {
+            slice_enriched_terms <- input$slice_enriched_terms
+            similarity_score <- input$similarity_score
+            
+            plot <- enrichment_logic$generateGoSemanticSimilarityPlot(enriched_terms, ontology, slice_enriched_terms, similarity_score)
+            go_error_msg_val(NULL)
+          })
+        }, error = function(e) {
+          go_error_msg_val(TRUE)
+          return(paste("Error:", e$message))
+        })
       })
-      # Get plot
-      withProgress(message="Calculating similarity, this may take a while...", value=0, {
-        slice_enriched_terms <- input$slice_enriched_terms
-        similarity_score <- input$similarity_score
-        
-        plot <- enrichment_logic$generateGoSemanticSimilarityPlot(enriched_terms, ontology, slice_enriched_terms, similarity_score)
-      })
+      req(is.null(go_error_msg_val()))
       
       enriched_terms_val(list(enriched_terms =  enriched_terms, plot = plot))
     })
     
+    observe({
+      if (is.null(go_error_msg_val())) {
+        shinyjs::hide("go_error_msg")
+        shinyjs::show("semantic_similarity_plot")
+        shinyjs::show("enriched_terms_table")
+      } else {
+        shinyjs::show("go_error_msg")
+        shinyjs::hide("semantic_similarity_plot")
+        shinyjs::hide("enriched_terms_table")
+        enriched_terms_val(NULL)
+      }
+    })
+    
     # Generate plot
-    output$semnatic_similarity_plot <- renderPlotly({
+    output$semantic_similarity_plot <- renderPlotly({
       req(!is.null(enriched_terms_val()))
       data <- enriched_terms_val()
       plot <- data[["plot"]]
@@ -134,16 +235,36 @@ server <- function(id, filters_data, data_list) {
     })
     
     reactome_enrichment_output <- reactiveVal(NULL)
-    
+    reactome_error_msg_val <- reactiveVal(NULL)
     observeEvent(input$get_reactome_plot, {
       pval <- input$reactome_p_val
       num_shown_pathways <- input$num_shown_pathways
       gene_list <- filters_data$gene_lists()[[input$reactome_gene_list_picker]]
       background <- data_list[["pcg_data"]]
       withProgress(message="Calculating enrichment, this may take a while...", value=0, {
-        enrichment_result <- enrichment_logic$reactomeEnrichment(gene_list, background, pval, num_shown_pathways)
+        tryCatch({
+          enrichment_result <- enrichment_logic$reactomeEnrichment(gene_list, background, pval, num_shown_pathways)
+          reactome_error_msg_val(NULL)
+        }, error = function(e) {
+          reactome_error_msg_val(TRUE)
+          return(paste("Error:", e$message))
+        })
       })
+      req(is.null(reactome_error_msg_val()))
       reactome_enrichment_output(enrichment_result)
+    })
+    
+    observe({
+      if (is.null(reactome_error_msg_val())) {
+        shinyjs::hide("reactome_error_msg")
+        shinyjs::show("reactome_plot")
+        shinyjs::show("reactome_table")
+      } else {
+        shinyjs::show("reactome_error_msg")
+        shinyjs::hide("reactome_plot")
+        shinyjs::hide("reactome_table")
+        reactome_enrichment_output(NULL)
+      }
     })
     
     output$reactome_plot <- renderPlot({
