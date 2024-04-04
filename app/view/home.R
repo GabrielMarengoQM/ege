@@ -28,8 +28,8 @@ ui <- function(id) {
       column(
         width = 6,
         h5("Primary functionalities:"),
-        p("1) Filter tab: Find gene sets within or outside the intersections of gene essentiality data resources."),
-        p("2) Plots tab: Characterise gene lists based on metadata and metrics related to gene essentiality."),
+        p("1) Filter tab: Generate gene sets within or outside the intersections of gene essentiality data resources."),
+        p("2) Plots tab: Characterise gene sets based on metadata and metrics related to gene essentiality."),
         p("3) Enrichment analysis tab: Perform GO or Pathway enrichment analysis of a gene set.")
       )
     ),
@@ -95,6 +95,14 @@ ui <- function(id) {
       ),
       p(
         HTML("<a href='https://doi.org/10.1038/s41467-020-14284-2' target='_blank'>Human and mouse essentiality screens as a resource for disease gene discovery.</a> Nat Commun. 2020 Jan 31; doi:10.1038/s41467-020-14284-2. PMID: 32005800; PMCID: PMC6994715."
+        )
+      ),
+      p(
+        HTML("<a href='https://doi.org/10.1186/s13073-022-01118-7' target='_blank'>Mendelian gene identification through mouse embryo viability screening.</a> Genome Med. 2022 Oct 13;14(1):119. doi: 10.1186/s13073-022-01118-7. PMID: 36229886; PMCID: PMC9563108."
+        )
+      ),
+      p(
+        HTML("<a href='https://doi.org/10.1101/2024.01.12.24301168' target='_blank'>Lethal phenotypes in Mendelian disorders.</a> medRxiv. 2024 Jan 13:2024.01.12.24301168. doi: 10.1101/2024.01.12.24301168. PMID: 38260283; PMCID: PMC10802756."
         )
       )
     ),

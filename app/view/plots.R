@@ -365,22 +365,22 @@ server <- function(id, filters_data, data_list) {
     # SEQUENCING METRICS SERVER----
     output$gnomad_lof_upper_90_ci_plot <- renderPlotly({
       req(length(filters_data$gene_lists()) > 0)
-      plots_logic$renderViolinPlot(constraint_data, "gnomad_lof_upper_90_ci", filters_data$gene_lists(), NULL, NULL, FALSE, "gnomAD LOEUF score")
+      plots_logic$renderViolinPlot(constraint_data, "gnomad_lof_upper_90_ci", filters_data$gene_lists(), NULL, 0.35, FALSE, "gnomAD LOEUF score")
     })
     
     output$mean_am_pathogenicity_plot <- renderPlotly({
       req(length(filters_data$gene_lists()) > 0)
-      plots_logic$renderViolinPlot(constraint_data, "mean_am_pathogenicity", filters_data$gene_lists(), NULL, NULL, FALSE, "Alpha Missense mean score")
+      plots_logic$renderViolinPlot(constraint_data, "mean_am_pathogenicity", filters_data$gene_lists(), NULL, 0.9, FALSE, "Alpha Missense mean score")
     })
     
     output$shet_rgcme_mean_plot <- renderPlotly({
       req(length(filters_data$gene_lists()) > 0)
-      plots_logic$renderViolinPlot(constraint_data, "shet_rgcme_mean", filters_data$gene_lists(), NULL, NULL, FALSE, "Shet (Sun et al. 2023)")
+      plots_logic$renderViolinPlot(constraint_data, "shet_rgcme_mean", filters_data$gene_lists(), NULL, 0.075, FALSE, "Shet (Sun et al. 2023)")
     })
     
     output$shet_post_mean_plot <- renderPlotly({
       req(length(filters_data$gene_lists()) > 0)
-      plots_logic$renderViolinPlot(constraint_data, "shet_post_mean", filters_data$gene_lists(), NULL, NULL, FALSE, "Shet (Zeng et al. 2023)")
+      plots_logic$renderViolinPlot(constraint_data, "shet_post_mean", filters_data$gene_lists(), NULL, 0.1, FALSE, "Shet (Zeng et al. 2023)")
     })
     
     output$domino_plot <- renderPlotly({
@@ -390,23 +390,23 @@ server <- function(id, filters_data, data_list) {
     
     output$scones_plot <- renderPlotly({
       req(length(filters_data$gene_lists()) > 0)
-      plots_logic$renderViolinPlot(constraint_data, "scones", filters_data$gene_lists(), NULL, NULL, FALSE, "SCoNeS score")
+      plots_logic$renderViolinPlot(constraint_data, "scones", filters_data$gene_lists(), NULL, c(0.25, 0.75), FALSE, "SCoNeS score")
     })
     
     # CELL LINES METRICS SERVER----
     output$mean_score_all_plot <- renderPlotly({
       req(length(filters_data$gene_lists()) > 0)
-      plots_logic$renderViolinPlot(constraint_data, "mean_score_all", filters_data$gene_lists(), NULL, NULL, FALSE, "DepMap mean gene effect score")
+      plots_logic$renderViolinPlot(constraint_data, "mean_score_all", filters_data$gene_lists(), NULL, c(-0.5, -1), FALSE, "DepMap mean gene effect score")
     })
     
     output$bf_lam_plot <- renderPlotly({
       req(length(filters_data$gene_lists()) > 0)
-      plots_logic$renderViolinPlot(constraint_data, "bf_lam", filters_data$gene_lists(), NULL, NULL, FALSE, "Bayes Factor (laminin grown hPSCs)")
+      plots_logic$renderViolinPlot(constraint_data, "bf_lam", filters_data$gene_lists(), NULL, 5, FALSE, "Bayes Factor (laminin grown hPSCs)")
     })
     
     output$bf_mef_plot <- renderPlotly({
       req(length(filters_data$gene_lists()) > 0)
-      plots_logic$renderViolinPlot(constraint_data, "bf_mef", filters_data$gene_lists(), NULL, NULL, FALSE, "Bayes Factor (MEF grown hPSCs)")
+      plots_logic$renderViolinPlot(constraint_data, "bf_mef", filters_data$gene_lists(), NULL, 5, FALSE, "Bayes Factor (MEF grown hPSCs)")
     })
   })
 }

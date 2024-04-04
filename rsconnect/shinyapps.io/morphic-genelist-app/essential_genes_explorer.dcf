@@ -1,0 +1,10 @@
+name: essential_genes_explorer
+title:
+username: morphic-genelist-app
+account: morphic-genelist-app
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11040070
+bundleId: 8449976
+url: https://whri-phenogenomics.shinyapps.io/essential_genes_explorer/
+version: 1

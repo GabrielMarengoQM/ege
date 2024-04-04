@@ -113,6 +113,9 @@ server <- function(id, filters_data, data_list) {
         
         # shinyjs::hide("semantic_similarity_plot")
         # shinyjs::hide("reactome_plot")
+        shinyjs::disable("get_reactome_plot")        
+        shinyjs::disable("get_go_plot")
+
       } else {
         #shinyjs::hide("go_plots_msg_1")
         #shinyjs::show("go_plots_msg_2")
@@ -122,6 +125,8 @@ server <- function(id, filters_data, data_list) {
         
         # shinyjs::show("semantic_similarity_plot")
         # shinyjs::show("reactome_plot")
+        shinyjs::enable("get_reactome_plot")        
+        shinyjs::enable("get_go_plot")
       }
       
       if (is.null(enriched_terms_val())) {

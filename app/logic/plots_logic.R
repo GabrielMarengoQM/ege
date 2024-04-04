@@ -86,10 +86,52 @@ renderViolinPlot <- function(raw_data, column, gene_lists, genes_to_highlight, t
       showlegend = TRUE
     )
   
-  if (!is.null(threshold_value)) {
+  # hline <- function(y = 0, color = "grey") {
+  #   list(
+  #     type = "line",
+  #     x0 = 0,
+  #     x1 = 1,
+  #     xref = "paper",
+  #     y0 = y,
+  #     y1 = y,
+  #     line = list(dash = "dash", color = color)
+  #   )
+  # }
+  # 
+  # if (!is.null(threshold_value)) {
+  #   violin_plot <- violin_plot %>%
+  #     layout(
+  #       shapes = list(hline(threshold_value))
+  #     )
+  # }
+  
+  hline <- function(y = 0, color = "grey") {
+    list(
+      type = "line",
+      x0 = 0,
+      x1 = 1,
+      xref = "paper",
+      y0 = y,
+      y1 = y,
+      line = list(dash = "dash", color = color)
+    )
+  }
+  
+  # Modified hline function to accept multiple threshold values
+  hlines <- function(y = 0, color = "grey") {
+    if (length(y) == 1) {
+      return(list(hline(y, color)))
+    } else {
+      lines <- lapply(y, function(y_val) hline(y_val, color))
+      return(lines)
+    }
+  }
+  
+  # Check if threshold_value is not NULL and is a vector
+  if (!is.null(threshold_value) && is.vector(threshold_value)) {
     violin_plot <- violin_plot %>%
       layout(
-        shapes = list(hline(threshold_value))
+        shapes = hlines(threshold_value)
       )
   }
   

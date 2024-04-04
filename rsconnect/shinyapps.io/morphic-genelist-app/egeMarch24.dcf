@@ -1,0 +1,10 @@
+name: egeMarch24
+title:
+username: morphic-genelist-app
+account: morphic-genelist-app
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11576115
+bundleId: 8449548
+url: https://whri-phenogenomics.shinyapps.io/egeMarch24/
+version: 1
