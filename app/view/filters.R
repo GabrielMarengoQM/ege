@@ -53,7 +53,7 @@ ui <- function(id, data_list) {
             )
         ),
         p("Click + to expand filters"),
-        # IMPC UI ----
+        # MOUSE UI ----
         box(title = tooltip(
           trigger = list(
             "Mouse models"
@@ -84,7 +84,7 @@ ui <- function(id, data_list) {
             materialSwitch(
               ns("impc_viability_na_switch"),
               "NA switch",
-              value = FALSE
+              value = TRUE
             ) |>
               tooltip("Switch On/Off to include/exclude missing values")
           )
@@ -106,7 +106,7 @@ ui <- function(id, data_list) {
             materialSwitch(
               ns("impc_zygosity_na_switch"),
               "NA switch",
-              value = FALSE
+              value = TRUE
             )
           )
         ),
@@ -127,7 +127,7 @@ ui <- function(id, data_list) {
             materialSwitch(
               ns("impc_wol_na_switch"),
               "NA switch",
-              value = FALSE
+              value = TRUE
             )
           )
         ),
@@ -148,7 +148,7 @@ ui <- function(id, data_list) {
             materialSwitch(
               ns("impc_ortholog_na_switch"),
               "NA switch",
-              value = FALSE
+              value = TRUE
             )
           )
         ),
@@ -163,7 +163,12 @@ ui <- function(id, data_list) {
             ns("impc_phenotypes_checkbox"),
             label = "Filter for all genes with an associated phenotype", 
             value = FALSE
-          )
+          ),
+        awesomeCheckbox(
+          ns("impc_phenotypes_checkbox2"),
+          label = "Filter for all genes without an associated phenotype", 
+          value = FALSE
+        )
         ),
         hr(),
         awesomeCheckbox(
@@ -188,7 +193,7 @@ ui <- function(id, data_list) {
             materialSwitch(
               ns("mgi_viability_na_switch"),
               "NA switch",
-              value = FALSE
+              value = TRUE
             )
           )
         )
@@ -231,7 +236,7 @@ ui <- function(id, data_list) {
                 materialSwitch(
                   ns("omim_lethality_na_switch"),
                   "NA switch",
-                  value = FALSE
+                  value = TRUE
                 ) |>
                   tooltip("Switch On/Off to include/exclude missing values")
               )
@@ -255,7 +260,7 @@ ui <- function(id, data_list) {
                 materialSwitch(
                   ns("omim_earliest_lethality_na_switch"),
                   "NA switch",
-                  value = FALSE
+                  value = TRUE
                 )
               )
             ),
@@ -275,7 +280,7 @@ ui <- function(id, data_list) {
                 materialSwitch(
                   ns("omim_number_na_switch"),
                   "NA switch",
-                  value = FALSE
+                  value = TRUE
                 )
               )
             ),
@@ -298,7 +303,7 @@ ui <- function(id, data_list) {
                 materialSwitch(
                   ns("omim_moi_na_switch"),
                   "NA switch",
-                  value = FALSE
+                  value = TRUE
                 ),
               )
             ),
@@ -310,6 +315,11 @@ ui <- function(id, data_list) {
               awesomeCheckbox(
                 ns("omim_phenotypes_checkbox"),
                 label = "Filter for all genes with an associated phenotype", 
+                value = FALSE
+              ),
+              awesomeCheckbox(
+                ns("omim_phenotypes_checkbox2"),
+                label = "Filter for all genes without an associated phenotype", 
                 value = FALSE
               )
             ),
@@ -338,7 +348,7 @@ ui <- function(id, data_list) {
             materialSwitch(
               ns("ddg2p_allelic_requirement_na_switch"),
               "NA switch",
-              value = FALSE
+              value = TRUE
             )
           )
         ),
@@ -361,7 +371,7 @@ ui <- function(id, data_list) {
             materialSwitch(
               ns("ddg2p_organ_specificity_na_switch"),
               "NA switch",
-              value = FALSE
+              value = TRUE
             )
           )
         ),
@@ -406,7 +416,7 @@ ui <- function(id, data_list) {
             materialSwitch(
               ns("mean_score_all_na_switch"),
               "NA switch",
-              value = FALSE
+              value = TRUE
             ) |>
           tooltip("Switch On/Off to include/exclude missing values"),
             # F2
@@ -422,7 +432,7 @@ ui <- function(id, data_list) {
             materialSwitch(
               ns("bf_lam_na_switch"),
               "NA switch",
-              value = FALSE
+              value = TRUE
             ),
             # F3
             sliderInput(ns('bf_mef_filter'),
@@ -437,7 +447,7 @@ ui <- function(id, data_list) {
             materialSwitch(
               ns("bf_mef_na_switch"),
               "NA switch",
-              value = FALSE
+              value = TRUE
             ),
         hr(),
         p("Population Sequencing scores"),
@@ -453,7 +463,7 @@ ui <- function(id, data_list) {
         materialSwitch(
           ns("gnomad_lof_upper_90_ci_na_switch"),
           "NA switch",
-          value = FALSE
+          value = TRUE
         ),
         # F2
         sliderInput(ns('mean_am_pathogenicity_filter'),
@@ -468,7 +478,7 @@ ui <- function(id, data_list) {
         materialSwitch(
           ns("mean_am_pathogenicity_na_switch"),
           "NA switch",
-          value = FALSE
+          value = TRUE
         ),
         # F3
         sliderInput(ns('shet_rgcme_mean_filter'),
@@ -483,7 +493,7 @@ ui <- function(id, data_list) {
         materialSwitch(
           ns("shet_rgcme_mean_na_switch"),
           "NA switch",
-          value = FALSE
+          value = TRUE
         ),
         # F4
         sliderInput(ns('shet_post_mean_filter'),
@@ -498,7 +508,7 @@ ui <- function(id, data_list) {
         materialSwitch(
           ns("shet_post_mean_na_switch"),
           "NA switch",
-          value = FALSE
+          value = TRUE
         ),
         # F5
         sliderInput(ns('domino_filter'),
@@ -513,7 +523,7 @@ ui <- function(id, data_list) {
         materialSwitch(
           ns("domino_na_switch"),
           "NA switch",
-          value = FALSE
+          value = TRUE
         ),
         # F6
         sliderInput(ns('scones_filter'),
@@ -528,14 +538,14 @@ ui <- function(id, data_list) {
         materialSwitch(
           ns("scones_na_switch"),
           "NA switch",
-          value = FALSE
+          value = TRUE
         )
         ),
 
        # F1
 
      # F1
-        # GENES BOX FILTER ----
+    # GENES BOX FILTER ----
      box(title = tooltip(
        trigger = list(
          "Gene list upload/entry"
@@ -555,7 +565,9 @@ ui <- function(id, data_list) {
        width = "100%",
        buttonLabel = "Browse...",
        placeholder = "No file selected"
-     )
+     ),
+     fluidRow(uiOutput(ns("input_checker_output")))
+    
       )
      ),
      # Save filtered lists ----
@@ -636,44 +648,118 @@ server <- function(id, data_list) {
     
     # Filters ----
     # applied_mouse----
+    # output$applied_filters_box_impc <- renderUI({
+    #   output_html <- character()
+    #   output_html <- c(output_html, HTML(paste("<u>","IMPC","</u>")))
+    #   
+    #   if (input$impc_annotations_checkbox == TRUE) {
+    #     if (length(unique(impc_data$impc_viability[!is.na(impc_data$impc_viability)])) > length(input$impc_viability_filter)) {
+    #       output <- paste("Viability: ", paste(input$impc_viability_filter, collapse = ", "))
+    #       output_html <- c(output_html, HTML(output))
+    #     } 
+    #     
+    #     if (length(unique(impc_data$impc_zygosity[!is.na(impc_data$impc_zygosity)])) > length(input$impc_zygosity_filter)) {
+    #       output <- paste("Zygosity: ", paste(input$impc_zygosity_filter, collapse = ", "))
+    #       output_html <- c(output_html, HTML(output))
+    #     } 
+    #     
+    #     if (length(unique(impc_data$wol[!is.na(impc_data$wol)])) > length(input$impc_wol_filter)) {
+    #       output <- paste("Window of Lethality: ", paste(input$impc_wol_filter, collapse = ", "))
+    #       output_html <- c(output_html, HTML(output))
+    #     } 
+    #     
+    #     if (length(unique(impc_data$ortholog_mapping[!is.na(impc_data$ortholog_mapping)])) > length(input$impc_ortholog_filter)) {
+    #       output <- paste("Orthologs: ", paste(input$impc_ortholog_filter, collapse = ", "))
+    #       output_html <- c(output_html, HTML(output))
+    #     }
+    #     
+    #     if(input$impc_phenotypes_checkbox == TRUE) {
+    #       output_html <- c(output_html, HTML("All genes with an associated IMPC phenotype"))
+    #     }
+    #     
+    #     if (nchar(input$impc_phenotypes_filter) > 0) {
+    #       output_html <- c(output_html, HTML("Custom IMPC phenotypes list"))
+    #     }
+    #     
+    #   } else {
+    #     output_html <- c(output_html ,"None")
+    #     
+    #   }
+    # 
+    #   # Concatenate the HTML outputs with line breaks
+    #   output_html <- paste(output_html, collapse = "<br>")
+    #   
+    #   return(HTML(output_html))
+    #   
+    # })
+    na_ON <- "Missing values included"
+    na_OFF <- "Missing values excluded"
+    
     output$applied_filters_box_impc <- renderUI({
+      
       output_html <- character()
       output_html <- c(output_html, HTML(paste("<u>","IMPC","</u>")))
-      
       if (input$impc_annotations_checkbox == TRUE) {
-        if (length(unique(impc_data$impc_viability[!is.na(impc_data$impc_viability)])) > length(input$impc_viability_filter)) {
+        if (length(unique(impc_data$impc_viability[!is.na(impc_data$impc_viability)])) != length(input$impc_viability_filter) & input$impc_viability_na_switch == TRUE) {
           output <- paste("Viability: ", paste(input$impc_viability_filter, collapse = ", "))
-          output_html <- c(output_html, HTML(output))
-        } 
-        
-        if (length(unique(impc_data$impc_zygosity[!is.na(impc_data$impc_zygosity)])) > length(input$impc_zygosity_filter)) {
-          output <- paste("Zygosity: ", paste(input$impc_zygosity_filter, collapse = ", "))
-          output_html <- c(output_html, HTML(output))
-        } 
-        
-        if (length(unique(impc_data$wol[!is.na(impc_data$wol)])) > length(input$impc_wol_filter)) {
-          output <- paste("Window of Lethality: ", paste(input$impc_wol_filter, collapse = ", "))
-          output_html <- c(output_html, HTML(output))
-        } 
-        
-        if (length(unique(impc_data$ortholog_mapping[!is.na(impc_data$ortholog_mapping)])) > length(input$impc_ortholog_filter)) {
-          output <- paste("Orthologs: ", paste(input$impc_ortholog_filter, collapse = ", "))
-          output_html <- c(output_html, HTML(output))
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$impc_viability_na_switch == FALSE) {
+          output <- paste("Viability: ", paste(input$impc_viability_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (length(unique(impc_data$impc_viability[!is.na(impc_data$impc_viability)])) == length(input$impc_viability_filter) & input$impc_viability_na_switch == TRUE) {
+          NULL
         }
         
-        if(input$impc_phenotypes_checkbox == TRUE) {
+        if (length(unique(impc_data$impc_zygosity[!is.na(impc_data$impc_zygosity)])) > length(input$impc_zygosity_filter) & input$impc_zygosity_na_switch == TRUE) {
+          output <- paste("Zygosity: ", paste(input$impc_zygosity_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_ON)
+        }  else if (input$impc_zygosity_na_switch == FALSE) {
+          output <- paste("Zygosity: ", paste(input$impc_zygosity_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (length(unique(impc_data$impc_zygosity[!is.na(impc_data$impc_zygosity)])) == length(input$impc_zygosity_filter) & input$impc_zygosity_na_switch == TRUE) {
+          NULL
+        }
+        
+        if (length(unique(impc_data$wol[!is.na(impc_data$wol)])) > length(input$impc_wol_filter) & input$impc_wol_na_switch == TRUE) {
+          output <- paste("Window of Lethality: ", paste(input$impc_wol_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_ON)
+        }  else if (input$impc_wol_na_switch == FALSE) {
+          output <- paste("Window of Lethality: ", paste(input$impc_wol_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (length(unique(impc_data$wol[!is.na(impc_data$wol)])) == length(input$impc_wol_filter) & input$impc_wol_na_switch == TRUE) {
+          NULL
+        }
+        
+        if (length(unique(impc_data$ortholog_mapping[!is.na(impc_data$ortholog_mapping)])) > length(input$impc_ortholog_filter) & input$impc_ortholog_na_switch == TRUE) {
+          output <- paste("Orthologs: ", paste(input$impc_ortholog_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$impc_ortholog_na_switch == FALSE) {
+          output <- paste("Orthologs: ", paste(input$impc_ortholog_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (length(unique(impc_data$ortholog_mapping[!is.na(impc_data$ortholog_mapping)])) == length(input$impc_ortholog_filter) & input$impc_ortholog_na_switch == TRUE) {
+          NULL
+        }
+        
+        if (input$impc_phenotypes_checkbox == TRUE) {
           output_html <- c(output_html, HTML("All genes with an associated IMPC phenotype"))
+          shinyjs::disable("impc_phenotypes_checkbox2")
+        } else {
+          shinyjs::enable("impc_phenotypes_checkbox2")
+        }
+        
+        if (input$impc_phenotypes_checkbox2 == TRUE) {
+          output_html <- c(output_html, HTML("All genes without an associated IMPC phenotype"))
+          shinyjs::disable("impc_phenotypes_checkbox")
+        } else {
+          shinyjs::enable("impc_phenotypes_checkbox")
         }
         
         if (nchar(input$impc_phenotypes_filter) > 0) {
           output_html <- c(output_html, HTML("Custom IMPC phenotypes list"))
         }
-        
-      } else {
-        output_html <- c(output_html ,"default")
-        
+      } else if (input$impc_annotations_checkbox == FALSE) {
+        output_html <- c(output_html ,"None")
       }
-  
       # Concatenate the HTML outputs with line breaks
       output_html <- paste(output_html, collapse = "<br>")
       
@@ -686,13 +772,18 @@ server <- function(id, data_list) {
       output_html <- c(output_html, HTML(paste("<u>","MGI","</u>")))
       
       if (input$mgi_annotations_checkbox == TRUE) {
-        if (length(unique(mgi_data$mgi_viability[!is.na(mgi_data$mgi_viability)])) > length(input$mgi_viability_filter)) {
+        if (length(unique(mgi_data$mgi_viability[!is.na(mgi_data$mgi_viability)])) > length(input$mgi_viability_filter) & input$mgi_viability_na_switch == TRUE) {
           output <- paste("Viability: ", paste(input$mgi_viability_filter, collapse = ", "))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$mgi_viability_na_switch == FALSE) {
+          output <- paste("Viability: ", paste(input$mgi_viability_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (length(unique(mgi_data$mgi_viability[!is.na(mgi_data$mgi_viability)])) == length(input$mgi_viability_filter) & input$mgi_viability_na_switch == TRUE) {
+          NULL
+        }
         
       } else {
-        output_html <- c(output_html ,"default")
+        output_html <- c(output_html ,"None")
         
       }
       
@@ -709,28 +800,58 @@ server <- function(id, data_list) {
       output_html <- c(output_html, HTML(paste("<u>","OMIM","</u>")))
       
       if (input$omim_annotations_checkbox == TRUE) {
-        if (length(unique(omim_data$disease_gene_lethal[!is.na(omim_data$disease_gene_lethal)])) > length(input$omim_lethality_filter)) {
+        if (length(unique(omim_data$disease_gene_lethal[!is.na(omim_data$disease_gene_lethal)])) > length(input$omim_lethality_filter) & input$omim_lethality_na_switch == TRUE) {
           output <- paste("Lethality: ", paste(input$omim_lethality_filter, collapse = ", "))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$omim_lethality_na_switch == FALSE) {
+          output <- paste("Lethality: ", paste(input$omim_lethality_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (length(unique(omim_data$disease_gene_lethal[!is.na(omim_data$disease_gene_lethal)])) == length(input$omim_lethality_filter) & input$omim_lethality_na_switch == TRUE) {
+          NULL
+        }
         
-        if (length(unique(omim_data$earliest_lethality_category[!is.na(omim_data$earliest_lethality_filter)])) > length(input$earliest_lethality_category)) {
-          output <- paste("Earliest Lethality: ", paste(input$earliest_lethality_filter, collapse = ", "))
-          output_html <- c(output_html, HTML(output))
-        } 
+        if (length(unique(omim_data$earliest_lethality_category[!is.na(omim_data$earliest_lethality_category)])) > length(input$omim_earliest_lethality_filter) & input$omim_earliest_lethality_na_switch == TRUE) {
+          output <- paste("Earliest Lethality: ", paste(input$omim_earliest_lethality_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$omim_earliest_lethality_na_switch == FALSE) {
+          output <- paste("Earliest Lethality: ", paste(input$omim_earliest_lethality_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (length(unique(omim_data$earliest_lethality_category[!is.na(omim_data$earliest_lethality_category)])) == length(input$omim_earliest_lethality_filter) & input$omim_earliest_lethality_na_switch == TRUE) {
+          NULL
+        }
         
-        if (length(unique(omim_data$number_key[!is.na(omim_data$number_key)])) > length(input$omim_number_filter)) {
+        if (length(unique(omim_data$number_key[!is.na(omim_data$number_key)])) > length(input$omim_number_filter) & input$omim_number_na_switch == TRUE) {
           output <- paste("Molecular basis: ", paste(input$omim_number_filter, collapse = ", "))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$omim_number_na_switch == FALSE) {
+          output <- paste("Molecular basis: ", paste(input$omim_number_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (length(unique(omim_data$number_key[!is.na(omim_data$number_key)])) == length(input$omim_number_filter) & input$omim_number_na_switch == TRUE) {
+          NULL
+        }
         
-        if (length(unique(omim_data$moi[!is.na(omim_data$moi)])) > length(input$omim_moi_filter)) {
+        if (length(unique(omim_data$moi[!is.na(omim_data$moi)])) > length(input$omim_moi_filter) & input$omim_moi_na_switch == TRUE) {
           output <- paste("Mode of inheritance: ", paste(input$omim_moi_filter, collapse = ", "))
-          output_html <- c(output_html, HTML(output))
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$omim_moi_na_switch == FALSE) {
+          output <- paste("Mode of inheritance: ", paste(input$omim_moi_filter, collapse = ", "))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (length(unique(omim_data$moi[!is.na(omim_data$moi)])) == length(input$omim_moi_filter) & input$omim_moi_na_switch == TRUE) {
+          NULL
         }
         
         if(input$omim_phenotypes_checkbox == TRUE) {
           output_html <- c(output_html, HTML("All genes with an associated OMIM phenotype"))
+          shinyjs::disable("omim_phenotypes_checkbox2")
+        } else {
+          shinyjs::enable("omim_phenotypes_checkbox2")
+        }
+        
+        if(input$omim_phenotypes_checkbox2 == TRUE) {
+          output_html <- c(output_html, HTML("All genes without an associated OMIM phenotype"))
+          shinyjs::disable("omim_phenotypes_checkbox")
+        } else {
+          shinyjs::enable("omim_phenotypes_checkbox")
         }
         
         if (nchar(input$omim_phenotypes_filter) > 0) {
@@ -738,7 +859,7 @@ server <- function(id, data_list) {
         }
         
       } else {
-        output_html <- c(output_html ,"default")
+        output_html <- c(output_html ,"None")
         
       }
       
@@ -773,7 +894,7 @@ server <- function(id, data_list) {
         }
         
       } else {
-        output_html <- c(output_html ,"default")
+        output_html <- c(output_html ,"None")
         
       }
       
@@ -791,24 +912,47 @@ server <- function(id, data_list) {
       
       if (input$constraint_annotations_checkbox == TRUE) {
         
-        if (min(constraint_data$mean_score_all, na.rm = TRUE) != input$mean_score_all_filter[1] | max(constraint_data$mean_score_all, na.rm = TRUE) != input$mean_score_all_filter[2]) {
+        # if (min(constraint_data$mean_score_all, na.rm = TRUE) != input$mean_score_all_filter[1] | max(constraint_data$mean_score_all, na.rm = TRUE) != input$mean_score_all_filter[2]) {
+        #   output <- paste("Achilles score: ", paste("min: ", input$mean_score_all_filter[1], ", ", "max: ",  input$mean_score_all_filter[2]))
+        #   output_html <- c(output_html, HTML(output))
+        # } 
+        if (min(constraint_data$mean_score_all, na.rm = TRUE) != input$mean_score_all_filter[1] & input$mean_score_all_na_switch == FALSE | max(constraint_data$mean_score_all, na.rm = TRUE) != input$mean_score_all_filter[2] & input$mean_score_all_na_switch == FALSE) {
           output <- paste("Achilles score: ", paste("min: ", input$mean_score_all_filter[1], ", ", "max: ",  input$mean_score_all_filter[2]))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (min(constraint_data$mean_score_all, na.rm = TRUE) != input$mean_score_all_filter[1] & input$mean_score_all_na_switch == TRUE | max(constraint_data$mean_score_all, na.rm = TRUE) != input$mean_score_all_filter[2] & input$mean_score_all_na_switch == TRUE) {
+          output <- paste("Achilles score: ", paste("min: ", input$mean_score_all_filter[1], ", ", "max: ",  input$mean_score_all_filter[2]))
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (min(constraint_data$mean_score_all, na.rm = TRUE) == input$mean_score_all_filter[1] & input$mean_score_all_na_switch == FALSE | max(constraint_data$mean_score_all, na.rm = TRUE) == input$mean_score_all_filter[2] & input$mean_score_all_na_switch == FALSE) {
+          output <- paste("Achilles score: ", paste("min: ", input$mean_score_all_filter[1], ", ", "max: ",  input$mean_score_all_filter[2]))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        }
         
-        if (min(constraint_data$bf_lam, na.rm = TRUE) != input$bf_lam_filter[1] | max(constraint_data$bf_lam, na.rm = TRUE) != input$bf_lam_filter[2]) {
+        
+        if (min(constraint_data$bf_lam, na.rm = TRUE) != input$bf_lam_filter[1] & input$bf_lam_na_switch == FALSE | max(constraint_data$bf_lam, na.rm = TRUE) != input$bf_lam_filter[2] & input$bf_lam_na_switch == FALSE) {
           output <- paste("Bayes Factor (laminin): ", paste("min: ", input$bf_lam_filter[1], ", ", "max: ",  input$bf_lam_filter[2]))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (min(constraint_data$bf_lam, na.rm = TRUE) != input$bf_lam_filter[1] & input$bf_lam_na_switch == TRUE | max(constraint_data$bf_lam, na.rm = TRUE) != input$bf_lam_filter[2] & input$bf_lam_na_switch == TRUE) {
+          output <- paste("Bayes Factor (laminin): ", paste("min: ", input$bf_lam_filter[1], ", ", "max: ",  input$bf_lam_filter[2]))
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (min(constraint_data$bf_lam, na.rm = TRUE) == input$bf_lam_filter[1] & input$bf_lam_na_switch == FALSE | max(constraint_data$bf_lam, na.rm = TRUE) == input$bf_lam_filter[2] & input$bf_lam_na_switch == FALSE) {
+          output <- paste("Bayes Factor (laminin): ", paste("min: ", input$bf_lam_filter[1], ", ", "max: ",  input$bf_lam_filter[2]))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        }
         
-        if (min(constraint_data$bf_mef, na.rm = TRUE) != input$bf_mef_filter[1] | max(constraint_data$bf_mef, na.rm = TRUE) != input$bf_mef_filter[2]) {
+        if (min(constraint_data$bf_mef, na.rm = TRUE) != input$bf_mef_filter[1] & input$bf_mef_na_switch == FALSE | max(constraint_data$bf_mef, na.rm = TRUE) != input$bf_mef_filter[2] & input$bf_mef_na_switch == FALSE ) {
           output <- paste("Bayes Factor (mef): ", paste("min: ", input$bf_mef_filter[1], ", ", "max: ",  input$bf_mef_filter[2]))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_OFF)
+        } else if (min(constraint_data$bf_mef, na.rm = TRUE) != input$bf_mef_filter[1] & input$bf_mef_na_switch == TRUE | max(constraint_data$bf_mef, na.rm = TRUE) != input$bf_mef_filter[2] & input$bf_mef_na_switch == TRUE ) {
+          output <- paste("Bayes Factor (mef): ", paste("min: ", input$bf_mef_filter[1], ", ", "max: ",  input$bf_mef_filter[2]))
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (min(constraint_data$bf_mef, na.rm = TRUE) == input$bf_mef_filter[1] & input$bf_mef_na_switch == FALSE | max(constraint_data$bf_mef, na.rm = TRUE) == input$bf_mef_filter[2] & input$bf_mef_na_switch == FALSE ) {
+          output <- paste("Bayes Factor (mef): ", paste("min: ", input$bf_mef_filter[1], ", ", "max: ",  input$bf_mef_filter[2]))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        }
         
         
       } else {
-        output_html <- c(output_html ,"default")
+        output_html <- c(output_html ,"None")
       }
       
       # Concatenate the HTML outputs with line breaks
@@ -823,40 +967,58 @@ server <- function(id, data_list) {
       output_html <- c(output_html, HTML(paste("<u>","Population Sequencing","</u>")))
       
       if (input$constraint_annotations_checkbox == TRUE) {
-        if (min(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE) != input$gnomad_lof_upper_90_ci_filter[1] | max(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE) != input$gnomad_lof_upper_90_ci_filter[2]) {
+        if (min(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE) != input$gnomad_lof_upper_90_ci_filter[1] & input$gnomad_lof_upper_90_ci_na_switch == TRUE | max(constraint_data$gnomad_lof_upper_90_ci, na.rm = TRUE) != input$gnomad_lof_upper_90_ci_filter[2] & input$gnomad_lof_upper_90_ci_na_switch == TRUE ) {
           output <- paste("LOEUF score: ", paste("min: ", input$gnomad_lof_upper_90_ci_filter[1], ", ", "max: ",  input$gnomad_lof_upper_90_ci_filter[2]))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$gnomad_lof_upper_90_ci_na_switch == FALSE) {
+          output <- paste("LOEUF score: ", paste("min: ", input$gnomad_lof_upper_90_ci_filter[1], ", ", "max: ",  input$gnomad_lof_upper_90_ci_filter[2]))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        }
         
-        if (min(constraint_data$mean_am_pathogenicity, na.rm = TRUE) != input$mean_am_pathogenicity_filter[1] | max(constraint_data$mean_am_pathogenicity, na.rm = TRUE) != input$mean_am_pathogenicity_filter[2]) {
+        if (min(constraint_data$mean_am_pathogenicity, na.rm = TRUE) != input$mean_am_pathogenicity_filter[1]  & input$mean_am_pathogenicity_na_switch == TRUE | max(constraint_data$mean_am_pathogenicity, na.rm = TRUE) != input$mean_am_pathogenicity_filter[2]  & input$mean_am_pathogenicity_na_switch == TRUE) {
           output <- paste("AlphaMissense score: ", paste("min: ", input$mean_am_pathogenicity_filter[1], ", ", "max: ",  input$mean_am_pathogenicity_filter[2]))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$mean_am_pathogenicity_na_switch == FALSE) {
+          output <- paste("AlphaMissense score: ", paste("min: ", input$mean_am_pathogenicity_filter[1], ", ", "max: ",  input$mean_am_pathogenicity_filter[2]))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        }
         
-        if (min(constraint_data$shet_rgcme_mean, na.rm = TRUE) != input$shet_rgcme_mean_filter[1] | max(constraint_data$shet_rgcme_mean, na.rm = TRUE) != input$shet_rgcme_mean_filter[2]) {
+        if (min(constraint_data$shet_rgcme_mean, na.rm = TRUE) != input$shet_rgcme_mean_filter[1] & input$shet_rgcme_mean_na_switch == TRUE | max(constraint_data$shet_rgcme_mean, na.rm = TRUE) != input$shet_rgcme_mean_filter[2] & input$shet_rgcme_mean_na_switch == TRUE) {
           output <- paste("Shet score (RGC-ME): ", paste("min: ", input$shet_rgcme_mean_filter[1], ", ", "max: ",  input$shet_rgcme_mean_filter[2]))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$shet_rgcme_mean_na_switch == FALSE) {
+          output <- paste("Shet score (RGC-ME): ", paste("min: ", input$shet_rgcme_mean_filter[1], ", ", "max: ",  input$shet_rgcme_mean_filter[2]))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        }
         
-        if (min(constraint_data$shet_post_mean, na.rm = TRUE) != input$shet_post_mean_filter[1] | max(constraint_data$shet_post_mean, na.rm = TRUE) != input$shet_post_mean_filter[2]) {
+        if (min(constraint_data$shet_post_mean, na.rm = TRUE) != input$shet_post_mean_filter[1] & input$shet_post_mean_na_switch == TRUE | max(constraint_data$shet_post_mean, na.rm = TRUE) != input$shet_post_mean_filter[2]& input$shet_post_mean_na_switch == TRUE) {
           output <- paste("Shet score (gnomAD): ", paste("min: ", input$shet_post_mean_filter[1], ", ", "max: ",  input$shet_post_mean_filter[2]))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$shet_post_mean_na_switch == FALSE) {
+          output <- paste("Shet score (gnomAD): ", paste("min: ", input$shet_post_mean_filter[1], ", ", "max: ",  input$shet_post_mean_filter[2]))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        }
         
-        if (min(constraint_data$domino, na.rm = TRUE) != input$domino_filter[1] | max(constraint_data$domino, na.rm = TRUE) != input$domino_filter[2]) {
+        if (min(constraint_data$domino, na.rm = TRUE) != input$domino_filter[1] & input$domino_na_switch == TRUE | max(constraint_data$domino, na.rm = TRUE) != input$domino_filter[2] & input$domino_na_switch == TRUE) {
           output <- paste("DOMINO score: ", paste("min: ", input$domino_filter[1], ", ", "max: ",  input$domino_filter[2]))
-          output_html <- c(output_html, HTML(output))
-        } 
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$domino_na_switch == FALSE) {
+          output <- paste("DOMINO score: ", paste("min: ", input$domino_filter[1], ", ", "max: ",  input$domino_filter[2]))
+          output_html <- c(output_html, HTML(output), na_OFF)
+        }
         
-        if (min(constraint_data$scones, na.rm = TRUE) != input$scones_filter[1] | max(constraint_data$scones, na.rm = TRUE) != input$scones_filter[2]) {
+        if (min(constraint_data$scones, na.rm = TRUE) != input$scones_filter[1] & input$scones_na_switch == TRUE | max(constraint_data$scones, na.rm = TRUE) != input$scones_filter[2] & input$scones_na_switch == TRUE) {
           output <- paste("SCoNeS score: ", paste("min: ", input$scones_filter[1], ", ", "max: ",  input$scones_filter[2]))
-          output_html <- c(output_html, HTML(output))
+          output_html <- c(output_html, HTML(output), na_ON)
+        } else if (input$scones_na_switch == FALSE) {
+          output <- paste("SCoNeS score: ", paste("min: ", input$scones_filter[1], ", ", "max: ",  input$scones_filter[2]))
+          output_html <- c(output_html, HTML(output), na_OFF)
         } 
         
         
         
       } else {
-        output_html <- c(output_html, "default")
+        output_html <- c(output_html, "None")
       }
       
       # Concatenate the HTML outputs with line breaks
@@ -934,6 +1096,18 @@ server <- function(id, data_list) {
           }
         }
         
+        if (input$impc_phenotypes_checkbox2 == TRUE) {
+          
+          filtered_table5 <- filtered_table4 %>%
+            dplyr::filter(is.na(impc_phenotypes))
+          
+        }
+        
+        # To prevent the bar moving from 100% when no filters are applied yet
+        if (nrow(filtered_table5) == nrow(impc_data)) {
+          filtered_table5 <- NULL
+        }
+        
       } else if (input$impc_annotations_checkbox == FALSE) {
         filtered_table5 <- NULL
         
@@ -953,6 +1127,10 @@ server <- function(id, data_list) {
         } else if (input$mgi_viability_na_switch == FALSE) {
           filtered_table1 <- mgi_data %>%
             dplyr::filter(mgi_viability %in% input$mgi_viability_filter & !is.na(mgi_viability))
+        }
+        
+        if (nrow(filtered_table1) == nrow(mgi_data)) {
+          filtered_table1 <- NULL
         }
         
       } else if (input$mgi_annotations_checkbox == FALSE) {
@@ -1047,6 +1225,13 @@ server <- function(id, data_list) {
             # No text entered in the textarea, so keep the DataFrame as is
             filtered_table2 <- filtered_table1
           }
+        }
+        
+        if (input$omim_phenotypes_checkbox2 == TRUE) {
+          
+          filtered_table2 <- filtered_table1 %>%
+            dplyr::filter(is.na(phenotypes))
+          
         }
         
         if (input$omim_moi_na_switch == TRUE) {
@@ -1162,6 +1347,11 @@ server <- function(id, data_list) {
           
           filtered_table5 <- omim_data %>%
             dplyr::filter(gene_symbol %in% omim_data4)
+        }
+        
+        # To prevent the bar moving from 100% when no filters are applied yet
+        if (nrow(filtered_table5) == nrow(omim_data)) {
+          filtered_table5 <- NULL
         }
         
       } else if (input$omim_annotations_checkbox == FALSE) {
@@ -1520,6 +1710,7 @@ server <- function(id, data_list) {
         write.csv(df, file, quote = FALSE, row.names = FALSE)
       }
     )
+ 
     
     
     observe({
@@ -1532,13 +1723,164 @@ server <- function(id, data_list) {
     })
     
     saved_lists <- shiny::reactiveVal(list())
+    gene_list_checker_info <- shiny::reactiveVal(list()) 
     # SAVED LISTS SERVER ----
     observeEvent(input$user_files_upload, {
-      lists <- filters_logic$userFilesUploadToList(input$user_files_upload, FALSE)
+      data <- filters_logic$userFilesUploadToList2(input$user_files_upload, pcg_data)
+      lists <- data$genelist_names_list
       current_lists <- saved_lists()
       combined_lists <- c(current_lists, lists)
       saved_lists(combined_lists)
+      
+      gene_list_checker_info(data$other_data)
+      print(data$other_data)
+      })
+    
+    
+    output$input_checker_output <- renderUI({
+      # req(length(gene_list_checker_info()) > 0)
+      # names <- names(gene_list_checker_info())
+      # first_element <- names[[1]]
+      # data <- gene_list_checker_info()
+      # prev <- data[[first_element]][[1]]
+      # alias <- data[[first_element]][[2]]
+      # no_match <- data[[first_element]][[3]]
+      tagList(
+        fluidRow(
+          textOutput(session$ns("title1"))
+        ),
+        fluidRow(
+          reactableOutput(session$ns("prev_checker_tbl1")),
+          reactableOutput(session$ns("alias_checker_tbl1")),
+          textOutput(session$ns("no_match1"))
+        ),
+        fluidRow(
+          textOutput(session$ns("title2"))
+        ),
+        fluidRow(
+          reactableOutput(session$ns("prev_checker_tbl2")),
+          reactableOutput(session$ns("alias_checker_tbl2")),
+          textOutput(session$ns("no_match2"))
+        ),
+        fluidRow(
+          textOutput(session$ns("title3"))
+        ),
+        fluidRow(
+          reactableOutput(session$ns("prev_checker_tbl3")),
+          reactableOutput(session$ns("alias_checker_tbl3")),
+          textOutput(session$ns("no_match3"))
+        ),
+        fluidRow(
+          textOutput(session$ns("title4"))
+        ),
+        fluidRow(
+          reactableOutput(session$ns("prev_checker_tbl4")),
+          reactableOutput(session$ns("alias_checker_tbl4")),
+          textOutput(session$ns("no_match4"))
+        )
+      )
     })
+    
+    output$title1 <- renderText({
+      req(length(names(gene_list_checker_info())) >= 1)
+      names <- names(gene_list_checker_info())
+      names[1]
+    })
+    output$title2 <- renderText({
+      req(length(names(gene_list_checker_info())) >= 2)
+      names <- names(gene_list_checker_info())
+      names[2]
+    })
+    output$title3 <- renderText({
+      req(length(names(gene_list_checker_info())) >= 3)
+      names <- names(gene_list_checker_info())
+      names[3]
+    })
+    output$title4 <- renderText({
+      req(length(names(gene_list_checker_info())) >= 4)
+      names <- names(gene_list_checker_info())
+      names[4]
+    })
+    
+    output$prev_checker_tbl1 <- renderReactable({
+      req(length(names(gene_list_checker_info())) >= 1)
+      data <- gene_list_checker_info()
+      prev <- data[[1]][[1]]
+      reactable(prev)
+    })
+    output$prev_checker_tbl2 <- renderReactable({
+      req(length(names(gene_list_checker_info())) >= 2)
+      data <- gene_list_checker_info()
+      prev <- data[[2]][[1]]
+      reactable(prev)
+    })
+    output$prev_checker_tbl3 <- renderReactable({
+      req(length(names(gene_list_checker_info())) >= 3)
+      data <- gene_list_checker_info()
+      prev <- data[[3]][[1]]
+      reactable(prev)
+    })
+    output$prev_checker_tbl4 <- renderReactable({
+      req(length(names(gene_list_checker_info())) >= 4)
+      data <- gene_list_checker_info()
+      prev <- data[[4]][[1]]
+      reactable(prev)
+    })
+    
+    output$alias_checker_tbl1 <- renderReactable({
+      req(length(names(gene_list_checker_info())) >= 1)
+      data <- gene_list_checker_info()
+      prev <- data[[1]][[2]]
+      reactable(prev)
+    })
+    output$alias_checker_tbl2 <- renderReactable({
+      req(length(names(gene_list_checker_info())) >= 2)
+      data <- gene_list_checker_info()
+      prev <- data[[2]][[2]]
+      reactable(prev)
+    })
+    output$alias_checker_tbl3 <- renderReactable({
+      req(length(names(gene_list_checker_info())) >= 3)
+      data <- gene_list_checker_info()
+      prev <- data[[3]][[2]]
+      reactable(prev)
+    })
+    output$alias_checker_tbl4 <- renderReactable({
+      req(length(names(gene_list_checker_info())) >= 4)
+      data <- gene_list_checker_info()
+      prev <- data[[4]][[2]]
+      reactable(prev)
+    })
+    
+    output$no_match1 <- renderText({
+      req(length(names(gene_list_checker_info())) >= 1)
+      data <- gene_list_checker_info()
+      no_match <- data[[1]][[3]]
+      no_match2 <- paste(no_match, collapse = ", ")
+      paste("Genes not recognised:", no_match2)
+    })
+    output$no_match2 <- renderText({
+      req(length(names(gene_list_checker_info())) >= 2)
+      data <- gene_list_checker_info()
+      no_match <- data[[2]][[3]]
+      no_match2 <- paste(no_match, collapse = ", ")
+      paste("Genes not recognised:", no_match2)
+    })
+    output$no_match3 <- renderText({
+      req(length(names(gene_list_checker_info())) >= 3)
+      data <- gene_list_checker_info()
+      no_match <- data[[3]][[3]]
+      no_match2 <- paste(no_match, collapse = ", ")
+      paste("Genes not recognised:", no_match2)
+    })
+    output$no_match4 <- renderText({
+      req(length(names(gene_list_checker_info())) >= 4)
+      data <- gene_list_checker_info()
+      no_match <- data[[4]][[3]]
+      no_match2 <- paste(no_match, collapse = ", ")
+      paste("Genes not recognised:", no_match2)
+    })
+  
     
     # Add gene list when button clicked
     observeEvent(input$add_gene_list, {
@@ -1592,6 +1934,7 @@ server <- function(id, data_list) {
       shinyjs::reset("impc_ortholog_na_switch")
       shinyjs::reset("impc_phenotypes_filter")
       shinyjs::reset("impc_phenotypes_checkbox")
+      shinyjs::reset("impc_phenotypes_checkbox2")
       shinyjs::reset("mgi_annotations_checkbox")
       shinyjs::reset("mgi_viability_filter")
       shinyjs::reset("mgi_viability_na_switch")
@@ -1606,6 +1949,7 @@ server <- function(id, data_list) {
       shinyjs::reset("omim_moi_na_switch")
       shinyjs::reset("omim_phenotypes_filter")
       shinyjs::reset("omim_phenotypes_checkbox")
+      shinyjs::reset("omim_phenotypes_checkbox2")
       shinyjs::reset("ddg2p_annotations_checkbox")
       shinyjs::reset("ddg2p_allelic_requirement_filter")
       shinyjs::reset("ddg2p_allelic_requirement_na_switch")

@@ -1,31 +1,155 @@
 box::use(
   utils[read.csv, read.delim],
-  tools[file_ext]
+  tools[file_ext],
+  readxl[read_excel],
+  dplyr[...]
 )
 
 #' @export
-userFilesUploadToList <- function(files_data, header_option) {
+readFile <- function(file_path, pcg) {
+  # Get file extension
+  file_extension <- tools::file_ext(file_path)
+  all_genes <- c(pcg$gene_symbol, pcg$alias_symbol, pcg$prev_symbol)
+  
+  # Read file based on file extension
+  if (file_extension == "fst") {
+    # Read fst or RData file
+    data <- read.fst(file_path)
+  } else if (file_extension == "csv") {
+    # Read csv file
+    data <- read.csv(file_path)
+  } else if (file_extension == "xlsx") {
+    # Read Excel file
+    data <- readxl::read_excel(file_path)
+  } else if (file_extension == "tsv") {
+    # Read tab-separated values (TSV) file
+    data <- read.delim(file_path, sep = "\t")
+  } else if (file_extension == "txt") {
+    # Read text (TXT) file
+    data <- read.table(file_path) # Adjust arguments based on your TXT format
+  } else if (file_extension %in% c("rda", "rds", "RData")) {
+    # Read RDS (R Data Serialization) file
+    data <- readRDS(file_path)
+  } else {
+    # Unsupported file type
+    stop("Unsupported file type.")
+  }
+  
+  data <- data %>%
+    pull(1)  %>%
+    trimws()
+  
+  return(data)
+}
+
+
+#' @export
+checkInputs2 <- function(input_gene_list_path, pcg) {
+
+  # Read list
+  gene_list <- readFile(input_gene_list_path, pcg)
+  
+  official_genes <- pcg$gene_symbol
+  alias_genes <- pcg$alias_symbol
+  prev_genes <- pcg$prev_symbol
+  all_genes <- c(pcg$gene_symbol, pcg$alias_symbol, pcg$prev_symbol)
+  
+  official_genes2 <- intersect(official_genes, gene_list)
+  alias_genes2 <- intersect(alias_genes, gene_list)
+  # Only retain alias gene to convert (genes can be both alias & official/current)
+  alias_genes2 <- setdiff(alias_genes2, official_genes2)
+  prev_genes2 <- intersect(prev_genes, gene_list)
+  # Only retain alias gene to convert (genes can be both prev & official/current) Another way to do this is only intersect by genes not captured by official_genes2
+  prev_genes2 <- setdiff(prev_genes2, official_genes2)
+  no_match <- setdiff(gene_list, all_genes)
+  
+  prev2official_tbl <- pcg %>%
+    filter(prev_symbol %in% prev_genes2) %>%
+    dplyr::select(gene_symbol, prev_symbol) %>%
+    distinct()
+  
+  prev2official2 <- pcg %>%
+    filter(prev_symbol %in% prev_genes2) %>%
+    pull(gene_symbol) %>%
+    unique()
+  
+  alias2official_tbl <- pcg %>%
+    filter(alias_symbol %in% alias_genes2) %>%
+    dplyr::select(gene_symbol, alias_symbol) %>%
+    distinct()
+  
+  alias2official2 <- pcg %>%
+    filter(alias_symbol %in% alias_genes2) %>%
+    pull(gene_symbol) %>%
+    unique()
+  
+  returned_list <- unique(c(official_genes2, prev2official2, alias2official2))
+  
+  # print(returned_list)
+  # print(prev2official_tbl)
+  # print(alias2official_tbl)
+  # print(no_match)
+  
+  return(
+    list(
+      "gene_list" = returned_list,
+      "prev2official" = prev2official_tbl,
+      "alias2official" = alias2official_tbl,
+      "no_match" = no_match
+    )
+  )
+}
+
+#' #' @export
+#' userFilesUploadToList <- function(files_data, header_option) {
+#'   genelist_names_list <- list()
+#'   for (i in 1:nrow(files_data)) {
+#'     file_path <- files_data[i, "datapath"]
+#'     file_extension <- tools::file_ext(file_path)
+#'     
+#'     if (file_extension == "csv") {
+#'       file_data <- read.csv(file_path, header = header_option)
+#'     } else if (file_extension %in% c("tsv", "tab")) {
+#'       file_data <- read.delim(file_path, header = header_option)
+#'     } else {
+#'       stop(paste("Unsupported file format for file:", file_path))
+#'     }
+#'     
+#'     # Remove file extension from the name
+#'     name_without_extension <- sub(sprintf("\\.%s$", file_extension), "", files_data[i, "name"])
+#'     
+#'     genelist_names_list[[name_without_extension]] <- file_data[, 1]
+#'   }
+#'   
+#'   return(genelist_names_list)
+#'   print(genelist_names_list)
+#' }
+
+#' @export
+userFilesUploadToList2 <- function(files_data, pcg) {
   genelist_names_list <- list()
+  other_data <- list()
   for (i in 1:nrow(files_data)) {
     file_path <- files_data[i, "datapath"]
     file_extension <- tools::file_ext(file_path)
     
-    if (file_extension == "csv") {
-      file_data <- read.csv(file_path, header = header_option)
-    } else if (file_extension %in% c("tsv", "tab")) {
-      file_data <- read.delim(file_path, header = header_option)
-    } else {
-      stop(paste("Unsupported file format for file:", file_path))
-    }
-    
+    file_data <- checkInputs2(file_path, pcg)
+
     # Remove file extension from the name
     name_without_extension <- sub(sprintf("\\.%s$", file_extension), "", files_data[i, "name"])
     
-    genelist_names_list[[name_without_extension]] <- file_data[, 1]
+    genelist_names_list[[name_without_extension]] <- file_data$gene_list
+    prev_tbl <- file_data$prev2official
+    alis_tbl <- file_data$alias2official
+    no_match <- file_data$no_match
+    other_data[[name_without_extension]] <- list(prev_tbl, alis_tbl, no_match)
   }
   
-  
-  
-  return(genelist_names_list)
+  return(
+    list(
+      "genelist_names_list" = genelist_names_list,
+      "other_data" = other_data
+      )
+  )
   print(genelist_names_list)
 }

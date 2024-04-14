@@ -22,7 +22,7 @@ ui <- function(id, filters_data) {
   ns <- NS(id)
   
   navset_card_underline(
-    # Panel with plot ----
+    # GO ui ----
     nav_panel("Semantic similarity analysis (GO)",
               #htmlOutput(ns("go_plots_msg_1")),
               htmlOutput(ns("go_plots_msg_2")),
@@ -51,7 +51,7 @@ ui <- function(id, filters_data) {
               actionButton(ns("get_go_plot"), "Analyse")
               ),
     
-    # Panel with summary ----
+    # Reactome ui ----
     nav_panel("Pathway enrichment analysis (Reactome)",
               #htmlOutput(ns("reactome_plots_msg_1")),
               htmlOutput(ns("reactome_plots_msg_2")),
@@ -64,7 +64,17 @@ ui <- function(id, filters_data) {
               numericInput(ns("reactome_p_val"), "p value for enrichment analysis", 0.05),
               numericInput(ns("num_shown_pathways"), "Number of pathways displayed", 10),
               actionButton(ns("get_reactome_plot"), "Analyse")
-              
+              ),
+    # OR ui ----
+    nav_panel("Odds ratio analysis (Disease, Mouse knockout, Essentiality)",
+              fluidRow(
+                pickerInput(ns("OR_dataset_picker"), "select data set for Odds Ratios Analysis",
+                            choices = c("OMIM Disease genes", "IMPC Lethal genes", "DepMap Essential genes")),
+                pickerInput(ns("OR_gene_list_picker"), "select gene list",
+                            choices = NULL),
+                reactableOutput(ns("OR_table")),
+                actionButton(ns("get_OR_table"), "Analyse")
+              )
               )
   )
 }
@@ -73,7 +83,13 @@ ui <- function(id, filters_data) {
 server <- function(id, filters_data, data_list) {
   moduleServer(id, function(input, output, session) {
     
-    # GO ----
+    pcg_data <- data_list[["pcg_data"]]
+    impc_data <- data_list[["impc_data"]]
+    omim_data <- data_list[["omim_data"]]
+    constraint_data <- data_list[["constraint_data"]]
+    
+    
+    # GO server ----
     output$go_plots_msg_1 <- renderUI({
       HTML("To perform enrichment analysis, first save a gene list using the 'Filter' tab. <br>
            Then select your gene list and parameters of choice then click 'Analyse'")
@@ -228,7 +244,7 @@ server <- function(id, filters_data, data_list) {
       )
     })
     
-    # Reactome ----
+    # Reactome server ----
     # Update gene list selector
     observe({
       updatePickerInput(
@@ -280,6 +296,40 @@ server <- function(id, filters_data, data_list) {
     output$reactome_table <- renderReactable({
       req(!is.null(reactome_enrichment_output()))
       table <- reactome_enrichment_output()[["enriched_pathway_table"]]
+      reactable(table)
+    })
+    
+    # OR server ----
+    observe({
+      updatePickerInput(
+        session = session,
+        "OR_gene_list_picker",
+        selected = NULL,
+        choices = names(filters_data$gene_lists())
+      )
+    })
+    
+    OR_table_val <- shiny::reactiveVal(NULL)
+    observeEvent(input$get_OR_table, {
+      compare_list_option <- input$OR_dataset_picker
+      my_list <-filters_data$gene_lists()[[input$OR_gene_list_picker]]
+
+      # Selecting the dataset based on compare_list_option
+      if (compare_list_option == "OMIM Disease genes") {
+        dataset <- data_list[["omim_data"]]
+      } else if (compare_list_option == "IMPC Lethal genes") {
+        dataset <- data_list[["impc_data"]]
+      } else if (compare_list_option == "DepMap Essential genes") {
+        dataset <- data_list[["constraint_data"]]
+      }
+      
+      tbl <- enrichment_logic$oddsRatioPlot(compare_list_option, my_list, pcg_data, dataset)
+      OR_table_val(tbl)
+    })
+    
+    output$OR_table <- renderReactable({
+      req(!is.null(OR_table_val()))
+      table <- OR_table_val()
       reactable(table)
     })
     

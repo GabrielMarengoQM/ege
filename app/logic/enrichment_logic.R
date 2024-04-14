@@ -5,7 +5,8 @@ box::use(
   ggplot2[...],
   dplyr[...],
   ReactomePA[enrichPathway],
-  enrichplot[pairwise_termsim, emapplot]
+  enrichplot[pairwise_termsim, emapplot],
+  epitools[...]
 )
 
 # GO ----
@@ -99,6 +100,89 @@ reactomeEnrichment <- function(gene_list, background_set, pval, no_pathways_show
   return(list(enriched_pathway_table = enriched_pathway_table, plot = plot))
 }
 
+# Ods ratio ----
+#' @export
+oddsRatioAnalysisDisease <- function(data, input_gene_list, pcg) {
+  disease_genes <- data %>%
+    filter(number_key == "The molecular basis for the disorder is known; a mutation has been found in the gene") %>%
+    pull(gene_symbol) %>%
+    unique()
+  df <- pcg %>%
+    select(gene_symbol) %>%
+    mutate(selected = ifelse(gene_symbol %in% input_gene_list, "y", "n")) %>%
+    mutate(disease_gene = ifelse(gene_symbol %in% disease_genes, "y", "n"))
+  
+  return(df)
+}
 
+oddsRatioAnalysisMouseKnockout <- function(data, input_gene_list, pcg) {
+  lethal_genes <- data %>%
+    filter(impc_viability == "lethal") %>%
+    pull(gene_symbol) %>%
+    unique()
+  df <- pcg %>%
+    select(gene_symbol) %>%
+    mutate(selected = ifelse(gene_symbol %in% input_gene_list, "y", "n")) %>%
+    mutate(disease_gene = ifelse(gene_symbol %in% lethal_genes, "y", "n"))
+  
+  return(df)
+}
 
+#' @export
+oddsRatioPlot <- function(compare_list_option, my_list, pcg, dataset) {
+  print(my_list)
+  if (compare_list_option == "OMIM Disease genes") {
+    compare_list <- dataset %>%
+      dplyr::filter(number_key == "The molecular basis for the disorder is known; a mutation has been found in the gene") %>%
+      dplyr::pull(gene_symbol) %>%
+      unique()
+  } else if (compare_list_option == "IMPC Lethal genes") {
+    compare_list <- dataset %>%
+      dplyr::filter(impc_viability == "lethal") %>%
+      dplyr::pull(gene_symbol) %>%
+      unique()
+  } else if (compare_list_option == "DepMap Essential genes") {
+    compare_list <- dataset %>%
+      dplyr::filter(mean_score_all < -0.5) %>%
+      dplyr::pull(gene_symbol) %>%
+      unique()
+  }
+  
+  print(compare_list)
+  
+  df <- pcg %>%
+    select(gene_symbol) %>%
+    mutate(selected = ifelse(gene_symbol %in% my_list, "y", "n")) %>%
+    mutate(compared = ifelse(gene_symbol %in% compare_list, "y", "n"))
+  
+  print(df)
+  
+  contigency_table <- table(df$compared, df$selected)
+  
+  print(contigency_table)
+  
+  # Can't continue with incorrect contingency table
+  # Check if the dimension is 2x1
+  if (all(dim(contigency_table) == c(2, 1))) {
+    # Add a new column 'y' with values 0, 0
+    contigency_table <- cbind(contigency_table, y = c(0, 0))
+    # Printing the updated table
+    print(contigency_table)
+  }
+  
+  or_all <- oddsratio(contigency_table, method = "wald")
+  # change to DP not SF
+  or_all_or <- signif(or_all$measure[2], 3)
+  or_all_lower <- signif(or_all$measure[4], 3)
+  or_all_upper <- signif(or_all$measure[6], 3)
+  or_all_pvalue <- signif(or_all$p.value[4], 3)
+  or_all_df <- data.frame(or = or_all_or,
+                          or_lower = or_all_lower,
+                          or_upper = or_all_upper,
+                          pvalue = or_all_pvalue)
+  print(or_all_df)
+  return(or_all_df)
+}
+
+#oddsRatioPlot("OMIM Disease genes", pcg_data[1:10000, 3], pcg_data, omim_data)
 
