@@ -1733,19 +1733,13 @@ server <- function(id, data_list) {
       saved_lists(combined_lists)
       
       gene_list_checker_info(data$other_data)
-      print(data$other_data)
+      # print(data$other_data)
       })
     
-    
+    # Add check for headers in files
     output$input_checker_output <- renderUI({
-      # req(length(gene_list_checker_info()) > 0)
-      # names <- names(gene_list_checker_info())
-      # first_element <- names[[1]]
-      # data <- gene_list_checker_info()
-      # prev <- data[[first_element]][[1]]
-      # alias <- data[[first_element]][[2]]
-      # no_match <- data[[first_element]][[3]]
       tagList(
+        textOutput(session$ns("upload_title")),
         fluidRow(
           textOutput(session$ns("title1"))
         ),
@@ -1781,6 +1775,11 @@ server <- function(id, data_list) {
       )
     })
     
+    output$upload_title <- renderText({
+      req(length(names(gene_list_checker_info())) >= 1)
+      HTML("Files uploaded:")
+    })
+    
     output$title1 <- renderText({
       req(length(names(gene_list_checker_info())) >= 1)
       names <- names(gene_list_checker_info())
@@ -1806,24 +1805,28 @@ server <- function(id, data_list) {
       req(length(names(gene_list_checker_info())) >= 1)
       data <- gene_list_checker_info()
       prev <- data[[1]][[1]]
+      req(nrow(prev) > 0)
       reactable(prev)
     })
     output$prev_checker_tbl2 <- renderReactable({
       req(length(names(gene_list_checker_info())) >= 2)
       data <- gene_list_checker_info()
       prev <- data[[2]][[1]]
+      req(nrow(prev) > 0)
       reactable(prev)
     })
     output$prev_checker_tbl3 <- renderReactable({
       req(length(names(gene_list_checker_info())) >= 3)
       data <- gene_list_checker_info()
       prev <- data[[3]][[1]]
+      req(nrow(prev) > 0)
       reactable(prev)
     })
     output$prev_checker_tbl4 <- renderReactable({
       req(length(names(gene_list_checker_info())) >= 4)
       data <- gene_list_checker_info()
       prev <- data[[4]][[1]]
+      req(nrow(prev) > 0)
       reactable(prev)
     })
     
@@ -1831,24 +1834,28 @@ server <- function(id, data_list) {
       req(length(names(gene_list_checker_info())) >= 1)
       data <- gene_list_checker_info()
       prev <- data[[1]][[2]]
+      req(nrow(prev) > 0)
       reactable(prev)
     })
     output$alias_checker_tbl2 <- renderReactable({
       req(length(names(gene_list_checker_info())) >= 2)
       data <- gene_list_checker_info()
       prev <- data[[2]][[2]]
+      req(nrow(prev) > 0)
       reactable(prev)
     })
     output$alias_checker_tbl3 <- renderReactable({
       req(length(names(gene_list_checker_info())) >= 3)
       data <- gene_list_checker_info()
       prev <- data[[3]][[2]]
+      req(nrow(prev) > 0)
       reactable(prev)
     })
     output$alias_checker_tbl4 <- renderReactable({
       req(length(names(gene_list_checker_info())) >= 4)
       data <- gene_list_checker_info()
       prev <- data[[4]][[2]]
+      req(nrow(prev) > 0)
       reactable(prev)
     })
     
@@ -1857,6 +1864,7 @@ server <- function(id, data_list) {
       data <- gene_list_checker_info()
       no_match <- data[[1]][[3]]
       no_match2 <- paste(no_match, collapse = ", ")
+      req(length(no_match) > 0)
       paste("Genes not recognised:", no_match2)
     })
     output$no_match2 <- renderText({
@@ -1864,6 +1872,7 @@ server <- function(id, data_list) {
       data <- gene_list_checker_info()
       no_match <- data[[2]][[3]]
       no_match2 <- paste(no_match, collapse = ", ")
+      req(length(no_match) > 0)
       paste("Genes not recognised:", no_match2)
     })
     output$no_match3 <- renderText({
@@ -1871,6 +1880,7 @@ server <- function(id, data_list) {
       data <- gene_list_checker_info()
       no_match <- data[[3]][[3]]
       no_match2 <- paste(no_match, collapse = ", ")
+      req(length(no_match) > 0)
       paste("Genes not recognised:", no_match2)
     })
     output$no_match4 <- renderText({
@@ -1878,6 +1888,7 @@ server <- function(id, data_list) {
       data <- gene_list_checker_info()
       no_match <- data[[4]][[3]]
       no_match2 <- paste(no_match, collapse = ", ")
+      req(length(no_match) > 0)
       paste("Genes not recognised:", no_match2)
     })
   
