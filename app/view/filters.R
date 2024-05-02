@@ -2,11 +2,13 @@ box::use(
   shiny[bootstrapPage, div, moduleServer, NS, renderUI, tags, uiOutput, renderText, textOutput, tagList,
         fluidRow, column, actionButton, observe, observeEvent, numericInput, sliderInput, textAreaInput,
         fileInput, hr, downloadHandler, downloadButton, textInput, req, reactive, tabsetPanel, tabPanel,
-        icon, h5, p, reactiveVal, reactiveValues],
+        icon, h5, p, reactiveVal, reactiveValues, updateTextInput, selectInput, updateTextAreaInput,
+        reactiveValuesToList, onBookmark, onRestore, enableBookmarking, bookmarkButton],
   fst[read.fst],
   reactable[reactable, reactableOutput, renderReactable],
   shinyWidgets[pickerInput, progressBar, updateProgressBar, pickerOptions, materialSwitch, awesomeCheckbox,
-               multiInput, updateMultiInput, dropdownButton, tooltipOptions, useShinydashboard],
+               multiInput, updateMultiInput, dropdownButton, tooltipOptions, useShinydashboard, updatePickerInput,
+               updateMaterialSwitch, updateAwesomeCheckbox],
   dplyr[...],
   stats[na.omit, setNames],
   bslib[page_navbar, nav_panel, card, card_header, card_body, tooltip],
@@ -46,7 +48,8 @@ ui <- function(id, data_list) {
         width = 3,
         div(class = "filterHeader", # Add a row container
             div(class = "col-auto h5-column", # Define a column for the h5 element
-                h5("Filters")
+                h5("Filters"),
+                bookmarkButton()
             ),
             div(class = "col-auto actionButton-column", # Define a column for the bs_icon
                 actionButton(ns("reset_filters"), "Reset")
@@ -581,7 +584,6 @@ ui <- function(id, data_list) {
      column(
        width = 3,
        p("Save filtered gene list"),
-       p("To edit a list, select filters and save under the same name"),
        fluidRow(
          column(
            width = 6,
@@ -593,40 +595,33 @@ ui <- function(id, data_list) {
          )
        ),
        fluidRow(
-         column(
-           width = 6,
-           reactableOutput(ns("saved_lists_table"))
-         ),
-         column(
-           width = 3,
-           actionButton(ns("clear_saved_lists"), "Clear")
-         )
+         uiOutput(ns("selectInputs"))
        ),
+       # fluidRow(
+       #   column(
+       #     width = 6,
+       #     reactableOutput(ns("saved_lists_table"))
+       #   ),
+       #   column(
+       #     width = 3,
+       #     actionButton(ns("clear_saved_lists"), "Clear")
+       #   )
+       # ),
        fluidRow(
          p("Currently applied filters:"),
          fluidRow(
   
-           #p("Mouse models"),
            uiOutput(ns("applied_filters_box_impc")),
-           #p("MGI"),
            uiOutput(ns("applied_filters_box_mgi")),
-           
-      
-           #p("Diseases"),
-           #p("OMIM"),
            uiOutput(ns("applied_filters_box_omim")),
-           #p("DDG2P"),
            uiOutput(ns("applied_filters_box_ddg2p")),
-         
-     
-           #p("Constraint metrics"),
-           #p("Cell lines"),
            uiOutput(ns("applied_filters_box_cell_lines")),
-           #p("Sequencing"),
            uiOutput(ns("applied_filters_box_sequencing"))
            
          )
        )
+       # test ui ----
+       
      )
     )
     )
@@ -646,52 +641,8 @@ server <- function(id, data_list) {
     constraint_data <- data_list[["constraint_data"]]
     tbl_all <- data_list[["tbl_all"]]
     
+
     # Filters ----
-    # applied_mouse----
-    # output$applied_filters_box_impc <- renderUI({
-    #   output_html <- character()
-    #   output_html <- c(output_html, HTML(paste("<u>","IMPC","</u>")))
-    #   
-    #   if (input$impc_annotations_checkbox == TRUE) {
-    #     if (length(unique(impc_data$impc_viability[!is.na(impc_data$impc_viability)])) > length(input$impc_viability_filter)) {
-    #       output <- paste("Viability: ", paste(input$impc_viability_filter, collapse = ", "))
-    #       output_html <- c(output_html, HTML(output))
-    #     } 
-    #     
-    #     if (length(unique(impc_data$impc_zygosity[!is.na(impc_data$impc_zygosity)])) > length(input$impc_zygosity_filter)) {
-    #       output <- paste("Zygosity: ", paste(input$impc_zygosity_filter, collapse = ", "))
-    #       output_html <- c(output_html, HTML(output))
-    #     } 
-    #     
-    #     if (length(unique(impc_data$wol[!is.na(impc_data$wol)])) > length(input$impc_wol_filter)) {
-    #       output <- paste("Window of Lethality: ", paste(input$impc_wol_filter, collapse = ", "))
-    #       output_html <- c(output_html, HTML(output))
-    #     } 
-    #     
-    #     if (length(unique(impc_data$ortholog_mapping[!is.na(impc_data$ortholog_mapping)])) > length(input$impc_ortholog_filter)) {
-    #       output <- paste("Orthologs: ", paste(input$impc_ortholog_filter, collapse = ", "))
-    #       output_html <- c(output_html, HTML(output))
-    #     }
-    #     
-    #     if(input$impc_phenotypes_checkbox == TRUE) {
-    #       output_html <- c(output_html, HTML("All genes with an associated IMPC phenotype"))
-    #     }
-    #     
-    #     if (nchar(input$impc_phenotypes_filter) > 0) {
-    #       output_html <- c(output_html, HTML("Custom IMPC phenotypes list"))
-    #     }
-    #     
-    #   } else {
-    #     output_html <- c(output_html ,"None")
-    #     
-    #   }
-    # 
-    #   # Concatenate the HTML outputs with line breaks
-    #   output_html <- paste(output_html, collapse = "<br>")
-    #   
-    #   return(HTML(output_html))
-    #   
-    # })
     na_ON <- "Missing values included"
     na_OFF <- "Missing values excluded"
     
@@ -1725,6 +1676,156 @@ server <- function(id, data_list) {
     saved_lists <- shiny::reactiveVal(list())
     gene_list_checker_info <- shiny::reactiveVal(list()) 
     # SAVED LISTS SERVER ----
+    # observeEvent(input$user_files_upload, {
+    #   data <- filters_logic$userFilesUploadToList2(input$user_files_upload, pcg_data)
+    #   lists <- data$genelist_names_list
+    #   current_lists <- saved_lists()
+    #   combined_lists <- c(current_lists, lists)
+    #   saved_lists(combined_lists)
+    #   # Add to saved filters
+    #   for (name in names(lists)) {
+    #     filters <- list(
+    #       # mouse knockouts
+    #       impc_annotations_checkbox = "FALSE",
+    #       impc_viability_filter = na.omit(unique(impc_data$impc_viability)),
+    #       impc_viability_na_switch = TRUE,
+    #       impc_zygosity_filter = na.omit(unique(impc_data$impc_zygosity)),
+    #       impc_zygosity_na_switch = TRUE,
+    #       impc_wol_filter = na.omit(unique(impc_data$wol)),
+    #       impc_wol_na_switch = TRUE,
+    #       impc_ortholog_filter = na.omit(unique(impc_data$ortholog_mapping)),
+    #       impc_ortholog_na_switch = TRUE,
+    #       impc_phenotypes_filter = "",
+    #       impc_phenotypes_checkbox = FALSE,
+    #       impc_phenotypes_checkbox2 = FALSE
+    #     )
+    #     current_filters <- current_filters_store()
+    #     filter_name <- name
+    #     # Name the list and add it to 'current'
+    #     current_filters[[filter_name]] <- filters
+    #     
+    #     current_filters_store(current_filters)
+    #   }
+    #   
+    #   gene_list_checker_info(data$other_data)
+    #   # print(data$other_data)
+    #   })
+    
+    # STORE/EDIT SAVED LISTS ----
+    
+    # Add gene list when button clicked
+    observeEvent(input$add_gene_list, {
+      list_name <- input$add_gene_list_name
+      gene_list <- filtered_genes()  # Assuming filtered_genes() returns the gene list
+      saved_lists_list <- saved_lists()  # Get the current value of saved_lists
+      
+      # Append the new gene list to saved_lists with the given name
+      saved_lists_list[[list_name]] <- gene_list
+      
+      # Update the reactive value
+      saved_lists(saved_lists_list)
+      
+      shinyjs::reset("add_gene_list_name")
+    })
+    
+    # render UI elements ----
+    output$selectInputs <- renderUI({
+      names_list <- names(saved_lists())
+      req(length(names_list) > 0)
+      selectInputs <- lapply(names_list, function(name) {
+        fluidRow(
+          column(6, HTML(paste(name, ":"))),
+          column(3, actionButton(session$ns(paste0("edit_list_", name)), label = "Edit")),
+          column(3, actionButton(session$ns(paste0("clear_list_", name)), label = "Clear"))
+        )
+      })
+      do.call(tagList, selectInputs)
+    })
+    
+    current_filters_store <- reactiveVal({list()})
+    observeEvent(input$add_gene_list, {
+      filters <- list(
+        # mouse knockouts
+        impc_annotations_checkbox = input$impc_annotations_checkbox,
+        impc_viability_filter = input$impc_viability_filter,
+        impc_viability_na_switch = input$impc_viability_na_switch,
+        impc_zygosity_filter = input$impc_zygosity_filter,
+        impc_zygosity_na_switch = input$impc_zygosity_na_switch,
+        impc_wol_filter = input$impc_wol_filter,
+        impc_wol_na_switch = input$impc_wol_na_switch,
+        impc_ortholog_filter = input$impc_ortholog_filter,
+        impc_ortholog_na_switch = input$impc_ortholog_na_switch,
+        impc_phenotypes_filter = input$impc_phenotypes_filter,
+        impc_phenotypes_checkbox = input$impc_phenotypes_checkbox,
+        impc_phenotypes_checkbox2 = input$impc_phenotypes_checkbox2
+      )
+      current_filters <- current_filters_store()
+      filter_name <- input$add_gene_list_name
+      # Name the list and add it to 'current'
+      current_filters[[filter_name]] <- filters
+      
+      current_filters_store(current_filters)
+      
+      # if length of current_filters_store() < saved_lists() then add those indexes to current_filters_store() with default filter values
+      # i.e. impc_viability_filter != na.omit(unique(impc_data$impc_viability))
+    })
+    
+    # edit ----
+    already_added <- reactiveVal(list())
+    observe({
+      names_list <- names(saved_lists())
+      req(length(names_list) > 0)
+      for (name in names_list) {
+        ns_id <- paste0("edit_list_", name)
+        
+        if (!(ns_id %in% already_added())) {
+          observeEvent(input[[ns_id]], {
+            print("TRIGGERED EDIT")
+            updateTextInput(session, "add_gene_list_name", label = NULL, value = name)
+            
+            # Assuming 'current_filters_store' has named entries matching 'names_list'
+            filters <- current_filters_store()[[name]]
+            updateAwesomeCheckbox(session, "impc_annotations_checkbox", value = current_filters_store()[[name]]$impc_annotations_checkbox)
+            updatePickerInput(session, "impc_viability_filter", selected = current_filters_store()[[name]]$impc_viability_filter)
+            updateMaterialSwitch(session, "impc_viability_na_switch", value = current_filters_store()[[name]]$impc_viability_na_switch)
+            updatePickerInput(session, "impc_zygosity_filter", selected = current_filters_store()[[name]]$impc_zygosity_filter)
+            updateMaterialSwitch(session, "impc_zygosity_na_switch", value = current_filters_store()[[name]]$impc_zygosity_na_switch)
+            updatePickerInput(session, "impc_wol_filter", selected = current_filters_store()[[name]]$impc_wol_filter)
+            updateMaterialSwitch(session, "impc_wol_na_switch", value = current_filters_store()[[name]]$impc_wol_na_switch)
+            updatePickerInput(session, "impc_ortholog_filter", selected = current_filters_store()[[name]]$impc_ortholog_filter)
+            updateMaterialSwitch(session, "impc_ortholog_na_switch", value = current_filters_store()[[name]]$impc_ortholog_na_switch)
+            updateTextAreaInput(session, "impc_phenotypes_filter", value = current_filters_store()[[name]]$impc_phenotypes_filter)
+            updateAwesomeCheckbox(session, "impc_phenotypes_checkbox", value = current_filters_store()[[name]]$impc_phenotypes_checkbox)
+            updateAwesomeCheckbox(session, "impc_phenotypes_checkbox2", value = current_filters_store()[[name]]$impc_phenotypes_checkbox2)
+            
+          })
+          already_added(append(already_added(), ns_id))  # Update the list of added observers
+        }
+      }
+    })
+
+    
+    # clear ----
+    already_added2 <- reactiveVal(list())
+    observe({
+      names_list <- names(saved_lists())
+      req(length(names_list) > 0)
+      for (name in names_list) {
+        ns_id <- paste0("clear_list_", name)
+        print("TRIGGERED CLEAR")
+        if (!(ns_id %in% already_added2())) {
+          observeEvent(input[[ns_id]], {
+            list_of_saved_lists <- saved_lists()
+            list_of_saved_lists <- list_of_saved_lists[!names(list_of_saved_lists) %in% name]
+            saved_lists(list_of_saved_lists)
+          })
+          already_added2(append(already_added2(), ns_id))  # Update the list of added observers
+        }
+      }
+      
+    })
+    
+    # Upload files - For some reason, if we upload multiple files at once, the UI only responds for the last one
     observeEvent(input$user_files_upload, {
       data <- filters_logic$userFilesUploadToList2(input$user_files_upload, pcg_data)
       lists <- data$genelist_names_list
@@ -1732,46 +1833,76 @@ server <- function(id, data_list) {
       combined_lists <- c(current_lists, lists)
       saved_lists(combined_lists)
       
+      # Retrieve current filters once before the loop
+      current_filters <- current_filters_store()
+      
+      # Add to saved filters
+      for (name in names(lists)) {
+        filters <- list(
+          impc_annotations_checkbox = "FALSE",
+          impc_viability_filter = na.omit(unique(impc_data$impc_viability)),
+          impc_viability_na_switch = TRUE,
+          impc_zygosity_filter = na.omit(unique(impc_data$impc_zygosity)),
+          impc_zygosity_na_switch = TRUE,
+          impc_wol_filter = na.omit(unique(impc_data$wol)),
+          impc_wol_na_switch = TRUE,
+          impc_ortholog_filter = na.omit(unique(impc_data$ortholog_mapping)),
+          impc_ortholog_na_switch = TRUE,
+          impc_phenotypes_filter = "",
+          impc_phenotypes_checkbox = FALSE,
+          impc_phenotypes_checkbox2 = FALSE
+        )
+        filter_name <- name
+        # Name the list and add it to 'current'
+        current_filters[[filter_name]] <- filters
+      }
+      
+      # Save the updated filters back to the store after the loop
+      current_filters_store(current_filters)
       gene_list_checker_info(data$other_data)
-      # print(data$other_data)
-      })
+    })
     
+    # CAN USE LOOPS TO DYNAMICALLY CREATE THIS UI
     # Add check for headers in files
     output$input_checker_output <- renderUI({
       tagList(
         textOutput(session$ns("upload_title")),
         fluidRow(
-          textOutput(session$ns("title1"))
+          uiOutput(session$ns("title1"))
         ),
+        # fluidRow(reactableOutput(session$ns("prev_checker_tbl1")),),
+        # fluidRow(reactableOutput(session$ns("alias_checker_tbl1")),),
+        # fluidRow(textOutput(session$ns("no_match1"))),
+        reactableOutput(session$ns("prev_checker_tbl1")),
+        reactableOutput(session$ns("alias_checker_tbl1")),
+        textOutput(session$ns("no_match1")),
         fluidRow(
-          reactableOutput(session$ns("prev_checker_tbl1")),
-          reactableOutput(session$ns("alias_checker_tbl1")),
-          textOutput(session$ns("no_match1"))
+          uiOutput(session$ns("title2"))
         ),
+        # fluidRow(reactableOutput(session$ns("prev_checker_tbl2")),),
+        # fluidRow(reactableOutput(session$ns("alias_checker_tbl2")),),
+        # fluidRow(textOutput(session$ns("no_match2"))),
+        reactableOutput(session$ns("prev_checker_tbl2")),
+        reactableOutput(session$ns("alias_checker_tbl2")),
+        textOutput(session$ns("no_match2")),
         fluidRow(
-          textOutput(session$ns("title2"))
+          uiOutput(session$ns("title3"))
         ),
+        # fluidRow(reactableOutput(session$ns("prev_checker_tbl3")),),
+        # fluidRow(reactableOutput(session$ns("alias_checker_tbl3")),),
+        # fluidRow(textOutput(session$ns("no_match3"))),
+        reactableOutput(session$ns("prev_checker_tbl3")),
+        reactableOutput(session$ns("alias_checker_tbl3")),
+        textOutput(session$ns("no_match3")),
         fluidRow(
-          reactableOutput(session$ns("prev_checker_tbl2")),
-          reactableOutput(session$ns("alias_checker_tbl2")),
-          textOutput(session$ns("no_match2"))
+          uiOutput(session$ns("title4"))
         ),
-        fluidRow(
-          textOutput(session$ns("title3"))
-        ),
-        fluidRow(
-          reactableOutput(session$ns("prev_checker_tbl3")),
-          reactableOutput(session$ns("alias_checker_tbl3")),
-          textOutput(session$ns("no_match3"))
-        ),
-        fluidRow(
-          textOutput(session$ns("title4"))
-        ),
-        fluidRow(
-          reactableOutput(session$ns("prev_checker_tbl4")),
-          reactableOutput(session$ns("alias_checker_tbl4")),
-          textOutput(session$ns("no_match4"))
-        )
+        # fluidRow(reactableOutput(session$ns("prev_checker_tbl4")),),
+        # fluidRow(reactableOutput(session$ns("alias_checker_tbl4")),),
+        # fluidRow(textOutput(session$ns("no_match4"))),
+        reactableOutput(session$ns("prev_checker_tbl4")),
+        reactableOutput(session$ns("alias_checker_tbl4")),
+        textOutput(session$ns("no_match4")),
       )
     })
     
@@ -1783,22 +1914,75 @@ server <- function(id, data_list) {
     output$title1 <- renderText({
       req(length(names(gene_list_checker_info())) >= 1)
       names <- names(gene_list_checker_info())
-      names[1]
+      
+      # Start the HTML string with the underlined first name
+      html_output <- sprintf("<u>%s</u>", names[1])
+      
+      data <- gene_list_checker_info()
+      prev <- data[[1]][[1]]
+      alias <- data[[1]][[2]]
+      # Check if both 'prev' and 'alias' data frames have more than 0 rows
+      if (nrow(prev) == 0 && nrow(alias) == 0) {
+        # Add additional HTML line if condition is met
+        html_output <- paste(html_output, "No symbols converted or unrecognised", sep="<br>")
+      }
+      
+      # Use HTML() to render the string as HTML in the UI
+      HTML(html_output)
     })
     output$title2 <- renderText({
       req(length(names(gene_list_checker_info())) >= 2)
       names <- names(gene_list_checker_info())
-      names[2]
+      # Start the HTML string with the underlined first name
+      html_output <- sprintf("<u>%s</u>", names[2])
+      
+      data <- gene_list_checker_info()
+      prev <- data[[2]][[1]]
+      alias <- data[[2]][[2]]
+      # Check if both 'prev' and 'alias' data frames have more than 0 rows
+      if (nrow(prev) == 0 && nrow(alias) == 0) {
+        # Add additional HTML line if condition is met
+        html_output <- paste(html_output, "No symbols converted or unrecognised", sep="<br>")
+      }
+      
+      # Use HTML() to render the string as HTML in the UI
+      HTML(html_output)
     })
     output$title3 <- renderText({
       req(length(names(gene_list_checker_info())) >= 3)
       names <- names(gene_list_checker_info())
-      names[3]
+      # Start the HTML string with the underlined first name
+      html_output <- sprintf("<u>%s</u>", names[3])
+      
+      data <- gene_list_checker_info()
+      prev <- data[[3]][[1]]
+      alias <- data[[3]][[2]]
+      # Check if both 'prev' and 'alias' data frames have more than 0 rows
+      if (nrow(prev) == 0 && nrow(alias) == 0) {
+        # Add additional HTML line if condition is met
+        html_output <- paste(html_output, "No symbols converted or unrecognised", sep="<br>")
+      }
+      
+      # Use HTML() to render the string as HTML in the UI
+      HTML(html_output)
     })
     output$title4 <- renderText({
       req(length(names(gene_list_checker_info())) >= 4)
       names <- names(gene_list_checker_info())
-      names[4]
+      # Start the HTML string with the underlined first name
+      html_output <- sprintf("<u>%s</u>", names[4])
+      
+      data <- gene_list_checker_info()
+      prev <- data[[4]][[1]]
+      alias <- data[[4]][[2]]
+      # Check if both 'prev' and 'alias' data frames have more than 0 rows
+      if (nrow(prev) == 0 && nrow(alias) == 0) {
+        # Add additional HTML line if condition is met
+        html_output <- paste(html_output, "No symbols converted or unrecognised", sep="<br>")
+      }
+      
+      # Use HTML() to render the string as HTML in the UI
+      HTML(html_output)
     })
     
     output$prev_checker_tbl1 <- renderReactable({
@@ -1865,7 +2049,7 @@ server <- function(id, data_list) {
       no_match <- data[[1]][[3]]
       no_match2 <- paste(no_match, collapse = ", ")
       req(length(no_match) > 0)
-      paste("Genes not recognised:", no_match2)
+      paste("Unrecognised values:", no_match2)
     })
     output$no_match2 <- renderText({
       req(length(names(gene_list_checker_info())) >= 2)
@@ -1873,7 +2057,7 @@ server <- function(id, data_list) {
       no_match <- data[[2]][[3]]
       no_match2 <- paste(no_match, collapse = ", ")
       req(length(no_match) > 0)
-      paste("Genes not recognised:", no_match2)
+      paste("Unrecognised values:", no_match2)
     })
     output$no_match3 <- renderText({
       req(length(names(gene_list_checker_info())) >= 3)
@@ -1881,7 +2065,7 @@ server <- function(id, data_list) {
       no_match <- data[[3]][[3]]
       no_match2 <- paste(no_match, collapse = ", ")
       req(length(no_match) > 0)
-      paste("Genes not recognised:", no_match2)
+      paste("Unrecognised values:", no_match2)
     })
     output$no_match4 <- renderText({
       req(length(names(gene_list_checker_info())) >= 4)
@@ -1889,48 +2073,35 @@ server <- function(id, data_list) {
       no_match <- data[[4]][[3]]
       no_match2 <- paste(no_match, collapse = ", ")
       req(length(no_match) > 0)
-      paste("Genes not recognised:", no_match2)
+      paste("Unrecognised values:", no_match2)
     })
   
     
-    # Add gene list when button clicked
-    observeEvent(input$add_gene_list, {
-      list_name <- input$add_gene_list_name
-      gene_list <- filtered_genes()  # Assuming filtered_genes() returns the gene list
-      saved_lists_list <- saved_lists()  # Get the current value of saved_lists
-      
-      # Append the new gene list to saved_lists with the given name
-      saved_lists_list[[list_name]] <- gene_list
-      
-      # Update the reactive value
-      saved_lists(saved_lists_list)
-      
-      shinyjs::reset("add_gene_list_name")
-    })
     
-    observe({
-      # If add_gene_list_name is empty, disable the add_gene_list button
-      if (length(saved_lists()) == 0) {
-        shinyjs::hide("clear_saved_lists")
-      } else {
-        shinyjs::show("clear_saved_lists")
-      }
-    })
     
-    # Render list of gene lists as table
-    output$saved_lists_table <- renderReactable({
-      req(length(saved_lists()) > 0)
-      saved_lists_data <- saved_lists()
-      list_names <- names(saved_lists_data)
-      list_lengths <- sapply(saved_lists_data, length)
-      
-      # Create a data frame containing list names and their lengths
-      table_data <- data.frame(list_names = list_names, list_length = list_lengths,
-                               row.names = NULL)
-      table_data <- setNames(table_data, c("List name", "List length"))
-      # Render the table using reactable
-      reactable(table_data)
-    })
+    # observe({
+    #   # If add_gene_list_name is empty, disable the add_gene_list button
+    #   if (length(saved_lists()) == 0) {
+    #     shinyjs::hide("clear_saved_lists")
+    #   } else {
+    #     shinyjs::show("clear_saved_lists")
+    #   }
+    # })
+    
+    # # Render list of gene lists as table
+    # output$saved_lists_table <- renderReactable({
+    #   req(length(saved_lists()) > 0)
+    #   saved_lists_data <- saved_lists()
+    #   list_names <- names(saved_lists_data)
+    #   list_lengths <- sapply(saved_lists_data, length)
+    #   
+    #   # Create a data frame containing list names and their lengths
+    #   table_data <- data.frame(list_names = list_names, list_length = list_lengths,
+    #                            row.names = NULL)
+    #   table_data <- setNames(table_data, c("List name", "List length"))
+    #   # Render the table using reactable
+    #   reactable(table_data)
+    # })
     
     # Reset filters
     observeEvent(input$reset_filters, {
@@ -1992,10 +2163,165 @@ server <- function(id, data_list) {
     })
     
     # Reset list
-    observeEvent(input$clear_saved_lists, {
-      saved_lists(NULL)
-      shinyjs::reset("user_files_upload")
+    # observeEvent(input$clear_saved_lists, {
+    #   saved_lists(NULL)
+    #   shinyjs::reset("user_files_upload")
+    # })
+    
+    # Book marking ----
+    # onBookmark(function(state) {
+    #   state$values$currentSum <- saved_lists()
+    # })
+    # 
+    # # Read values from state$values when we restore
+    # onRestore(function(state) {
+    #   # saved_lists() <- state$values$currentSum
+    #   saved_lists() <- state$values$currentSum
+    # })
+    
+
+    # Handling bookmarking
+    onBookmark(function(state) {
+      # Safely store lists into the state
+      state$values$savedLists <- saved_lists()  # Retrieve the list directly
+      state$values$currentFilters <- current_filters_store()
+      state$values$alreadyAdded <- already_added()
+      state$values$alreadyAdded2 <- already_added2()
     })
+    
+    onRestore(function(state) {
+      # Restore the state directly to the reactive values
+      if (!is.null(state$values$savedLists)) {
+        saved_lists(state$values$savedLists)
+      }
+      if (!is.null(state$values$currentFilters)) {
+        current_filters_store(state$values$currentFilters)
+      }
+      if (!is.null(state$values$alreadyAdded)) {
+        already_added(state$values$alreadyAdded)
+      }
+      if (!is.null(state$values$alreadyAdded2)) {
+        already_added2(state$values$alreadyAdded2)
+      }
+    })
+    
+    # onRestore(function(state) {
+    #   # Restore the state directly to the reactive values
+    #   # if (!is.null(state$values$savedLists)) {
+    #   #   saved_lists(state$values$savedLists)
+    #   # }
+    #   saved_lists(state$values$savedLists)
+    #   # if (!is.null(state$values$currentFilters)) {
+    #   #   current_filters_store(state$values$currentFilters)
+    #   # }
+    #   current_filters_store(state$values$currentFilters)
+    #   # if (!is.null(state$values$alreadyAdded)) {
+    #   #   already_added(state$values$alreadyAdded)
+    #   # }
+    #   already_added(state$values$alreadyAdded)
+    #   
+    #   # if (!is.null(state$values$alreadyAdded2)) {
+    #   #   already_added2(state$values$alreadyAdded2)
+    #   # }
+    #   already_added2(state$values$alreadyAdded2)
+    # })
+
+    # onBookmark(function(state) {
+    #   state$values$currentSum3 <- already_added()
+    # })
+    # 
+    # # Read values from state$values when we restore
+    # onRestore(function(state) {
+    #   # saved_lists() <- state$values$currentSum
+    #   already_added() <- state$values$currentSum3 
+    # })
+    # 
+    # onBookmark(function(state) {
+    #   state$values$currentSum4 <- already_added2()
+    # })
+    # 
+    # # Read values from state$values when we restore
+    # onRestore(function(state) {
+    #   # saved_lists() <- state$values$currentSum
+    #   already_added2() <- state$values$currentSum4 
+    # })
+    # 
+    # onBookmark(function(state) {
+    #   state$values$currentSum5 <- filtered_table_impc()
+    # })
+    # 
+    # # Read values from state$values when we restore
+    # onRestore(function(state) {
+    #   # saved_lists() <- state$values$currentSum
+    #   filtered_table_impc() <- state$values$currentSum5 
+    # })
+    # 
+    # onBookmark(function(state) {
+    #   state$values$currentSum6 <- filtered_table_mgi()
+    # })
+    # 
+    # # Read values from state$values when we restore
+    # onRestore(function(state) {
+    #   # saved_lists() <- state$values$currentSum
+    #   filtered_table_mgi()<- state$values$currentSum6
+    # })
+    # 
+    # onBookmark(function(state) {
+    #   state$values$currentSum7 <- filtered_table_omim()
+    # })
+    # 
+    # # Read values from state$values when we restore
+    # onRestore(function(state) {
+    #   # saved_lists() <- state$values$currentSum
+    #   filtered_table_omim() <- state$values$currentSum7 
+    # })
+    # 
+    # onBookmark(function(state) {
+    #   state$values$currentSum8 <- filtered_table_ddg2p()
+    # })
+    # 
+    # # Read values from state$values when we restore
+    # onRestore(function(state) {
+    #   # saved_lists() <- state$values$currentSum
+    #   filtered_table_ddg2p() <- state$values$currentSum8 
+    # })
+    # 
+    # onBookmark(function(state) {
+    #   state$values$currentSum9 <- filtered_table_constraint()
+    # })
+    # 
+    # # Read values from state$values when we restore
+    # onRestore(function(state) {
+    #   # saved_lists() <- state$values$currentSum
+    #   filtered_table_constraint() <- state$values$currentSum9 
+    # })
+    # 
+    # onBookmark(function(state) {
+    #   state$values$currentSum10 <- filtered_genes()
+    # })
+    # 
+    # # Read values from state$values when we restore
+    # onRestore(function(state) {
+    #   # saved_lists() <- state$values$currentSum
+    #   filtered_genes() <- state$values$currentSum10
+    # })
+    # 
+    # onBookmark(function(state) {
+    #   state$values$currentSum11 <- gene_list_checker_info()
+    # })
+    # 
+    # # Read values from state$values when we restore
+    # onRestore(function(state) {
+    #   # saved_lists() <- state$values$currentSum
+    #   gene_list_checker_info() <- state$values$currentSum11
+    # })
+    
+
+    # ## Call bookmark function
+    # observe({
+    #   reactiveValuesToList(input)
+    #   # session$doBookmark()
+    # })
     
     # Pass lists to other modules
     list(

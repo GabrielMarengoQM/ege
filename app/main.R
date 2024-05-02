@@ -1,7 +1,7 @@
 box::use(
   shiny[bootstrapPage, div, moduleServer, NS, renderUI, tags, uiOutput, renderText, textOutput, tagList,
         navbarPage, tabPanel, fluidRow, column, actionButton, p, observeEvent, updateTabsetPanel,
-        tabsetPanel, updateNavbarPage],
+        tabsetPanel, updateNavbarPage, enableBookmarking, reactiveValuesToList, onBookmarked, observe],
   fst[read.fst],
   # reactable[reactable, reactableOutput, renderReactable],
   # shinyWidgets[pickerInput, progressBar, updateProgressBar, pickerOptions],
@@ -30,6 +30,9 @@ box::use(
 box::use(
   app/view[filters, home, plots, enrichment]
 )
+
+## enable Shiny bookmarking ----
+enableBookmarking(store = 'server')
 
 pcg_data <- read.fst("./data/pcg.fst")
 constraint_data <- read.fst("./data/constraint_metrics.fst")
@@ -80,5 +83,9 @@ server <- function(id) {
     filters_data <- filters$server("filter_page", data_list)
     plots$server("plots_page", filters_data, data_list)
     enrichment$server("enrichment_plot", filters_data, data_list)
+    
+   
+    
   })
+  
 }

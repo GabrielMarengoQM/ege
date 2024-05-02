@@ -9,7 +9,8 @@ box::use(
   htmltools[HTML],
   reactable[reactable, reactableOutput, renderReactable],
   bslib[navset_card_underline, nav_panel],
-  promises[...]
+  promises[...],
+  future[...]
 )
 
 # Import helper functions
@@ -182,22 +183,22 @@ server <- function(id, filters_data, data_list) {
     go_error_msg_val <- reactiveVal(NULL)
     observeEvent(input$get_go_plot, {
       # Get enriched terms
-      withProgress(message="Calculating enrichment, this may take a while...", value=0, { 
+      withProgress(message="Calculating enrichment, this may take a while...", value=0, {
         gene_list <- filters_data$gene_lists()[[input$semantic_similarity_gene_list_picker]]
         background <- data_list[["pcg_data"]]
         background <- background$gene_symbol
         ontology <- input$semantic_similarity_ontology_picker
-        
+
         p_val <- input$p_val_input
         q_val <- input$q_val_input
-       
+
         tryCatch({
           enriched_terms <- enrichment_logic$getEnrichedGoTerms(gene_list, background, ontology, p_val, q_val)
           # Get plot
           withProgress(message="Calculating similarity, this may take a while...", value=0, {
             slice_enriched_terms <- input$slice_enriched_terms
             similarity_score <- input$similarity_score
-            
+
             plot <- enrichment_logic$generateGoSemanticSimilarityPlot(enriched_terms, ontology, slice_enriched_terms, similarity_score)
             go_error_msg_val(NULL)
           })
@@ -207,9 +208,14 @@ server <- function(id, filters_data, data_list) {
         })
       })
       req(is.null(go_error_msg_val()))
-      
+
       enriched_terms_val(list(enriched_terms =  enriched_terms, plot = plot))
     })
+    
+    # testing async ----
+   
+    
+    
     
     observe({
       if (is.null(go_error_msg_val())) {

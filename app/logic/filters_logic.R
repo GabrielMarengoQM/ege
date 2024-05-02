@@ -35,6 +35,35 @@ readFile <- function(file_path, pcg) {
     stop("Unsupported file type.")
   }
   
+  # Check for genes in header
+  col_names <- names(data)
+  if (any(col_names %in% all_genes)) {
+    # Read file based on file extension
+    if (file_extension == "fst") {
+      # Read fst or RData file
+      data <- read.fst(file_path)
+    } else if (file_extension == "csv") {
+      # Read csv file
+      data <- read.csv(file_path, header = FALSE)
+    } else if (file_extension == "xlsx") {
+      # Read Excel file
+      data <- readxl::read_excel(file_path, col_names = FALSE)
+    } else if (file_extension == "tsv") {
+      # Read tab-separated values (TSV) file
+      data <- read.delim(file_path, sep = "\t", col.names = FALSE)
+    } else if (file_extension == "txt") {
+      # Read text (TXT) file
+      data <- read.table(file_path, header = FALSE) # Adjust arguments based on your TXT format
+    } else if (file_extension %in% c("rda", "rds", "RData")) {
+      # Read RDS (R Data Serialization) file
+      data <- readRDS(file_path)
+    } else {
+      # Unsupported file type
+      stop("Unsupported file type.")
+    }
+  }
+  
+  # print(data)
   data <- data %>%
     pull(1)  %>%
     trimws()
@@ -66,7 +95,9 @@ checkInputs2 <- function(input_gene_list_path, pcg) {
   prev2official_tbl <- pcg %>%
     filter(prev_symbol %in% prev_genes2) %>%
     dplyr::select(gene_symbol, prev_symbol) %>%
-    distinct()
+    distinct() %>%
+    rename(`Previous symbol` = prev_symbol, `Converted to` = gene_symbol) %>%
+    select(`Previous symbol`, `Converted to`)
   
   prev2official2 <- pcg %>%
     filter(prev_symbol %in% prev_genes2) %>%
@@ -76,7 +107,9 @@ checkInputs2 <- function(input_gene_list_path, pcg) {
   alias2official_tbl <- pcg %>%
     filter(alias_symbol %in% alias_genes2) %>%
     dplyr::select(gene_symbol, alias_symbol) %>%
-    distinct()
+    distinct() %>%
+    rename(`Alias symbol` = alias_symbol, `Converted to` = gene_symbol) %>%
+    select(`Alias symbol`, `Converted to`)
   
   alias2official2 <- pcg %>%
     filter(alias_symbol %in% alias_genes2) %>%
@@ -151,5 +184,5 @@ userFilesUploadToList2 <- function(files_data, pcg) {
       "other_data" = other_data
       )
   )
-  print(genelist_names_list)
+  # print(genelist_names_list)
 }

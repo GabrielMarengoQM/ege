@@ -40,3 +40,12 @@
 .shiny-input-text.form-control.shinyjs-resettable.shiny-bound-input {
   height: 46.6px !important;
 }
+
+.row.reactable.html-widget.html-widget-output.shiny-report-size.html-fill-item.shiny-bound-output {
+  width: 100% !important; /* This sets the width to 100% of its parent container */
+}
+
+.btn.btn-default.action-button.shiny-bound-input {
+  width: 50% !important;
+  background-color: black !important;
+}
